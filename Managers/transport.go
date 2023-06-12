@@ -11,15 +11,14 @@ type GetManagersRequest struct {
 }
 type GetManagersResponse struct {
 	manager []Manager
-	Err string      `json:"err,omitempty"`
+	Err     string `json:"err,omitempty"`
 }
 type PostManagerRequest struct {
-	manager Manager	
+	manager Manager
 }
 type PostManagerResponse struct {
-	v string
-	manager []Manager
-	Err string      `json:"err,omitempty"`
+	V   string `json:"Result:"`
+	Err string `json:"err,omitempty"`
 }
 
 func EncodeResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
@@ -33,7 +32,7 @@ func DecodeGetManagersRequest(_ context.Context, r *http.Request) (interface{}, 
 }
 func DecodePostManagerRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	var request PostManagerRequest
-	if err:=json.NewDecoder(r.Body).Decode(&request); err != nil{
+	if err := json.NewDecoder(r.Body).Decode(&request.manager); err != nil {
 		return nil, err
 	}
 	return request, nil

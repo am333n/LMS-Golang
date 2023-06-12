@@ -17,32 +17,32 @@ type Manager struct {
 }
 type Service interface {
 	GetManagers() ([]Manager, error)
-	PostManager(manager Manager) (string,[]Manager, error)
+	PostManager(manager Manager) (string, error)
 }
 type RepoService struct{}
 
 func (RepoService) GetManagers() ([]Manager, error) {
 	var managers []Manager
-	db,err := dc.GetDB()
-	if err!= nil {
-        return managers, err
-    }
-	err=db.Find(&managers).Error
-	if err!= nil {
-        return managers, err
-    }
-	return managers, nil
-	
-}
-func (RepoService)PostManager(manager Manager) (string,[]Manager, error) {
-	db,err := dc.GetDB()
-	if err!= nil {
-			return "",nil, err
+	db, err := dc.GetDB()
+	if err != nil {
+		return managers, err
 	}
-	err=db.Create(&manager).Error
-	if err!= nil {
-            return "",nil, err
-    }
-	return "",[]Manager{},nil
+	err = db.Find(&managers).Error
+	if err != nil {
+		return managers, err
+	}
+	return managers, nil
+
+}
+func (RepoService) PostManager(manager Manager) (string, error) {
+	db, err := dc.GetDB()
+	if err != nil {
+		return "", err
+	}
+	err = db.Create(&manager).Error
+	if err != nil {
+		return "", err
+	}
+	return "New Manager Added", nil
 
 }

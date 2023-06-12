@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	dc "lms/Database"
 	e "lms/Employees"
 	l "lms/Login"
@@ -44,6 +45,12 @@ func initialiseRouter() *mux.Router {
 		m.DecodeGetManagersRequest,
 		m.EncodeResponse,
 	)
+	PostManagerHandler := httptransport.NewServer(
+		m.MakePostManagerEndpoint(svcc),
+		m.DecodePostManagerRequest,
+		m.EncodeResponse,
+	)
+
 	router := mux.NewRouter()
 	//Login
 	router.HandleFunc("/login", l.Login).Methods("POST")
@@ -56,11 +63,11 @@ func initialiseRouter() *mux.Router {
 	router.Handle("/Employees/{id}", UpdateEmployeeHandler).Methods("PUT")
 	//manager
 	router.Handle("/Managers", GetManagersHandler).Methods("GET")
-	// router.HandleFunc("/Managers", m.PostManager).Methods("POST")
+	router.Handle("/Managers", PostManagerHandler).Methods("POST")
 	// router.HandleFunc("/Managers/{id}", m.GetManager).Methods("GET")
 	// router.HandleFunc("/Managers/{id}", m.DeleteManager).Methods("DELETE")
 	// router.HandleFunc("/Managers/{id}", m.PutManager).Methods("PUT")
-	// fmt.Println("The server is running on 8080")
+	fmt.Println("The server is running on 8080")
 
 	return router
 }
