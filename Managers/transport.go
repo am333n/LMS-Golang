@@ -20,7 +20,7 @@ type PostManagerResponse struct {
 	V   string `json:"Result:"`
 	Err string `json:"err,omitempty"`
 }
-
+//abcd
 type GetManagerByIdResponse struct {
 	V Manager `json:"Result:"`
 	Err     string `json:"err,omitempty"`
