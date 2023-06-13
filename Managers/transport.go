@@ -4,13 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"strconv"
+
+	"github.com/gorilla/mux"
 )
 
-type GetManagersRequest struct {
-	manager []Manager
-}
 type GetManagersResponse struct {
-	manager []Manager
+	V []Manager `json:"Response:"`
 	Err     string `json:"err,omitempty"`
 }
 type PostManagerRequest struct {
@@ -19,6 +19,11 @@ type PostManagerRequest struct {
 type PostManagerResponse struct {
 	V   string `json:"Result:"`
 	Err string `json:"err,omitempty"`
+}
+
+type GetManagerByIdResponse struct {
+	V Manager `json:"Result:"`
+	Err     string `json:"err,omitempty"`
 }
 
 func EncodeResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
@@ -36,4 +41,13 @@ func DecodePostManagerRequest(_ context.Context, r *http.Request) (interface{}, 
 		return nil, err
 	}
 	return request, nil
+}
+func DecodeGetManagerByIdRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	params := mux.Vars(r)
+	id ,err:= strconv.Atoi(params["id"])
+	if err!= nil {
+			return nil, err
+		}
+	return id, nil
+
 }

@@ -18,6 +18,7 @@ type Manager struct {
 type Service interface {
 	GetManagers() ([]Manager, error)
 	PostManager(manager Manager) (string, error)
+	GetManagerById(id int) (Manager, error)
 }
 type RepoService struct{}
 
@@ -45,4 +46,16 @@ func (RepoService) PostManager(manager Manager) (string, error) {
 	}
 	return "New Manager Added", nil
 
+}
+func (RepoService) GetManagerById(id int) (Manager, error) {
+	db,err:=dc.GetDB()
+	var manager	Manager
+	if err!=nil{
+			return Manager{},err
+		}
+	err=db.Where("Id=?",id).First(&manager).Error
+	if err!=nil{
+        return Manager{},err
+    }
+	return manager,nil
 }

@@ -26,3 +26,13 @@ func MakePostManagerEndpoint(svc Service) endpoint.Endpoint {
 
 	}
 }
+func MakeGetManagerByIdEndpoint(svc Service) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (interface{}, error) {
+		req:= request.(int)
+		v,err:=svc.GetManagerById(req)
+		if err!=nil{
+			return GetManagerByIdResponse{v,err.Error()},nil
+		}
+		return GetManagerByIdResponse{v,""},nil
+    }	
+}

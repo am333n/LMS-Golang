@@ -50,7 +50,11 @@ func initialiseRouter() *mux.Router {
 		m.DecodePostManagerRequest,
 		m.EncodeResponse,
 	)
-
+	GetManageByIdHandler:=httptransport.NewServer(
+		m.MakeGetManagerByIdEndpoint(svcc),
+        m.DecodeGetManagerByIdRequest,
+        m.EncodeResponse,
+	)
 	router := mux.NewRouter()
 	//Login
 	router.HandleFunc("/login", l.Login).Methods("POST")
@@ -64,7 +68,7 @@ func initialiseRouter() *mux.Router {
 	//manager
 	router.Handle("/Managers", GetManagersHandler).Methods("GET")
 	router.Handle("/Managers", PostManagerHandler).Methods("POST")
-	// router.HandleFunc("/Managers/{id}", m.GetManager).Methods("GET")
+	router.Handle("/Managers/{id}",GetManageByIdHandler).Methods("GET")
 	// router.HandleFunc("/Managers/{id}", m.DeleteManager).Methods("DELETE")
 	// router.HandleFunc("/Managers/{id}", m.PutManager).Methods("PUT")
 	fmt.Println("The server is running on 8080")
