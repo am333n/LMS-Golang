@@ -19,6 +19,8 @@ type Service interface {
 	GetManagers() ([]Manager, error)
 	PostManager(manager Manager) (string, error)
 	GetManagerById(id int) (Manager, error)
+	DeleteManager(id int) (string, error)
+	UpdateManager(id int, manager Manager) (string, error)
 }
 type RepoService struct{}
 
@@ -58,4 +60,28 @@ func (RepoService) GetManagerById(id int) (Manager, error) {
         return Manager{},err
     }
 	return manager,nil
+}
+func (RepoService) DeleteManager(id int)(string,error){
+	db,err:=dc.GetDB()
+	var manager    Manager
+	if err!=nil{
+        return "",err
+	}
+	err=db.Where("Id=?",id).Delete(&manager).Error
+	if err!=nil{
+		return "",err
+	}
+	return "Manager Deleted",nil
+
+}
+func (RepoService) UpdateManager(id int, manager Manager)(string,error){
+	db,err:=dc.GetDB()
+	if err !=nil{
+		return "",err
+	}
+	err=db.Where("id=?",id).Updates(&manager).Error
+	if err !=nil{
+		return "",err
+	}
+	return "Manager Successfully Updated",nil
 }
