@@ -6,6 +6,8 @@ import (
 	"github.com/go-kit/kit/endpoint"
 )
 
+/* ------------------------ Employee CRUD operations ------------------------ */
+
 func MakePostEmployeeEndpoint(svc Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(PostEmployeeRequest)
@@ -26,36 +28,90 @@ func MakeGetEmployeesEndpoint(svc Service) endpoint.Endpoint {
 		return GetEmployeesResponse{v, ""}, nil
 	}
 }
-func  MakeGetEmployeesByIdEndpoint(svc Service) endpoint.Endpoint {
+func MakeGetEmployeesByIdEndpoint(svc Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req:=request.(int)
-		v,err:=svc.GetEmployeeById(req)
-		if err!=nil{
-            return GetEmployeeByIdResponse{v,err.Error()},nil
-        }
-		return GetEmployeeByIdResponse{v,""},nil
+		req := request.(int)
+		v, err := svc.GetEmployeeById(req)
+		if err != nil {
+			return GetEmployeeByIdResponse{v, err.Error()}, nil
+		}
+		return GetEmployeeByIdResponse{v, ""}, nil
 
 	}
 }
 func MakeDeleteEmployeesByIdEndpoint(svc Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req:=request.(int)
-		result,err:=svc.DeleteEmployeeById(req)
-		if err!=nil{
-			return DeleteEmployeeByIdResponse{result,err.Error()},nil
+		req := request.(int)
+		result, err := svc.DeleteEmployeeById(req)
+		if err != nil {
+			return DeleteEmployeeByIdResponse{result, err.Error()}, nil
 		}
-		return DeleteEmployeeByIdResponse{result,""},nil
+		return DeleteEmployeeByIdResponse{result, ""}, nil
 	}
 
 }
 func MakeUpdateEmployeeEndpoint(svc Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req:=request.(UpdateEmployeeRequest)
-		result,res,err:=svc.UpdateEmployee(req.id,req.employee)
-		if err!=nil{
-            return UpdateEmployeeResponse{result,res,err.Error()},nil
-        }
-		return UpdateEmployeeResponse{result,res,""},nil
+		req := request.(UpdateEmployeeRequest)
+		result, res, err := svc.UpdateEmployee(req.id, req.employee)
+		if err != nil {
+			return UpdateEmployeeResponse{result, res, err.Error()}, nil
+		}
+		return UpdateEmployeeResponse{result, res, ""}, nil
 
+	}
+}
+func MakeApproveEmployeeEndpoint(svc Service) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (interface{}, error) {
+        req := request.(int)
+        res, err := svc.ApproveEmployee(req)
+        if err!= nil {
+            return DeleteEmployeeByIdResponse{res, err.Error()}, nil
+        }
+        return DeleteEmployeeByIdResponse{res, ""}, nil
+
+    }
+} 
+
+/* ------------------------- Employee Leave Function ------------------------ */
+
+func MakePostLeavesEndpoint(svc Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(int)
+		result, err := svc.PostLeaves(req)
+		if err != nil {
+			return DeleteEmployeeByIdResponse{result, err.Error()}, nil
+		}
+		return DeleteEmployeeByIdResponse{result, ""}, nil
+	}
+}
+func MakeDeleteLeavesEndpoint(svc Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(int)
+		result, err := svc.DeleteLeaves(req)
+		if err != nil {
+			return DeleteEmployeeByIdResponse{result, err.Error()}, nil
+		}
+		return DeleteEmployeeByIdResponse{result, ""}, nil
+	}
+}
+
+func MakeEnterLeaveEndpoint(svc Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(EnterLeaveRequest)
+		v, err := svc.EnterLeaves(req.id, req.leave)
+		if err != nil {
+			return EnterLeaveResponse{v, err.Error()}, nil
+		}
+		return EnterLeaveResponse{v, ""}, nil
+	}
+}
+
+/* ---------------------------- Request Endpoints --------------------------- */
+
+func MakePostLeaveRequestEndpoint(svc Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+
+		return nil,nil
 	}
 }
