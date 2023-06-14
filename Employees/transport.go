@@ -50,11 +50,15 @@ type EnterLeaveResponse struct {
     Err string `json:"err,omitempty"` // errors don't JSON-marshal, so we use a string
 }
 
-/* ---------------------- Employee CRUDEmcode & Decode ---------------------- */
+/* ---------------------- Employee CRUD Encode & Decode ---------------------- */
+
+//Common Encoder
 func EncodeResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
 	w.Header().Set("Content-Type", "application/json")
 	return json.NewEncoder(w).Encode(response)
 }
+
+
 func DecodePostEmployeeRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	var request PostEmployeeRequest
 	if err := json.NewDecoder(r.Body).Decode(&request.employee); err != nil {
@@ -113,4 +117,6 @@ func DecodeEnterLeaveRequest(_ context.Context, r *http.Request)(interface{},err
     }
     return request, nil
 }
+/* ---------------------- Leave Request Encode & Decode --------------------- */
+
 

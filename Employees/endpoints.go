@@ -61,6 +61,17 @@ func MakeUpdateEmployeeEndpoint(svc Service) endpoint.Endpoint {
 
 	}
 }
+func MakeApproveEmployeeEndpoint(svc Service) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (interface{}, error) {
+        req := request.(int)
+        res, err := svc.ApproveEmployee(req)
+        if err!= nil {
+            return DeleteEmployeeByIdResponse{res, err.Error()}, nil
+        }
+        return DeleteEmployeeByIdResponse{res, ""}, nil
+
+    }
+} 
 
 /* ------------------------- Employee Leave Function ------------------------ */
 
@@ -76,22 +87,31 @@ func MakePostLeavesEndpoint(svc Service) endpoint.Endpoint {
 }
 func MakeDeleteLeavesEndpoint(svc Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req:= request.(int)
-		result,err:=svc.DeleteLeaves(req)
-		if err!=nil{
-            return DeleteEmployeeByIdResponse{result,err.Error()},nil
-        }
+		req := request.(int)
+		result, err := svc.DeleteLeaves(req)
+		if err != nil {
+			return DeleteEmployeeByIdResponse{result, err.Error()}, nil
+		}
 		return DeleteEmployeeByIdResponse{result, ""}, nil
 	}
 }
 
 func MakeEnterLeaveEndpoint(svc Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req:= request.(EnterLeaveRequest)
-		v, err := svc.EnterLeaves(req.id,req.leave)
-		if err!= nil {
+		req := request.(EnterLeaveRequest)
+		v, err := svc.EnterLeaves(req.id, req.leave)
+		if err != nil {
 			return EnterLeaveResponse{v, err.Error()}, nil
 		}
 		return EnterLeaveResponse{v, ""}, nil
+	}
+}
+
+/* ---------------------------- Request Endpoints --------------------------- */
+
+func MakePostLeaveRequestEndpoint(svc Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+
+		return nil,nil
 	}
 }

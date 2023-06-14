@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
-/* --------------------------------- Tables --------------------------------- */
+//? --------------------------------- Tables --------------------------------- */
 
 type Employees struct {
 	gorm.Model `json:"-"`
@@ -31,11 +31,21 @@ type Leaves struct {
 	EmergencyLeave int `json:"Emergency_Leave"`
 	EmergencyTaken int `json:"Emergency_Taken"`
 }
+type Requests struct {
+	RequestID int `gorm:"autoIncrement"`
+	EmployeeID int `json:"employee_id"`
+	LeaveID int `json:"leave_id"`
+	Type string `json:"type"`
+	DateFrom string `json:"date_from"`
+	DateTo string `json:"date_to"`
+	Days int `json:"days"`
+	Reason string `json:"reason"`
+	Status string `json:"status"`
+}
 
-var employee Employees
 
 /* -------------------------------------------------------------------------- */
-/*+================================= Service =================================*/
+//*=============================== Service =================================*/
 /* -------------------------------------------------------------------------- */
 
 type Service interface {
@@ -47,10 +57,11 @@ type Service interface {
 	PostLeaves(id int) (string, error)
 	DeleteLeaves(id int) (string, error)
 	EnterLeaves(id int,leave Leaves) ([]Leaves, error)
+	ApproveEmployee(id int) (string, error)
 }
 type RepoService struct{}
 
-/* ------------------------- Employee CRUD Functions ------------------------ */
+//* ------------------------- Employee CRUD Functions ------------------------ */
 
 func (RepoService) PostEmployee(employee Employees) (Employees, error) {
 	var empty Employees
@@ -114,11 +125,29 @@ func (RepoService) UpdateEmployee(id int, employee Employees) (string, Employees
 	}
 	return "The data is updated", employee, nil
 }
-
+func (RepoService) ApproveEmployee(id int) (string, error){
+	db,err:=dc.GetDB()
+	if err!=nil{
+		return "",err
+	}
+	var employee Employees
+	if err := db.Table("employees").Where("id=?", id).Scan(&employee).Error; err != nil {
+		return "No Employee Found", err
+	}
+	if employee.Status == "pending" || employee.Status == ""{
+	
+		employee.Status="Approved"
+		if err:=db.Where("id=?",id).Updates(&employee).Error; err != nil {
+		return "", err
+		}
+		return "The employee is Approved",nil
+	}
+	return "The employee is already approved",nil
+}
 // ErrEmpty is returned when input string is empty
 var ErrEmpty = errors.New("empty employee name")
 
-/* ----------------------------- Leave Functions ---------------------------- */
+//* ----------------------------- Leave Functions ---------------------------- */
 
 func (RepoService) PostLeaves(id int) (string, error) {
 	db, err := dc.GetDB()
@@ -175,3 +204,6 @@ func (RepoService) EnterLeaves(id int, leave Leaves) ([]Leaves, error) {
 	db.Find(&leaves)
     return leaves, nil
 }
+
+/* ---------------------------- Request Functions --------------------------- */
+

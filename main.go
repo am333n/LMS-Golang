@@ -41,6 +41,11 @@ func initialiseRouter() *mux.Router {
 		e.DecodeUpdateEmployee,
 		e.EncodeResponse,
 	)
+	ApproveEmployeeHandler := httptransport.NewServer(
+		e.MakeApproveEmployeeEndpoint(svc),
+        e.DecodeDeleteEmployeeByIdRequest,
+        e.EncodeResponse,
+	)
 	//manager handlers
 	GetManagersHandler := httptransport.NewServer(
 		m.MakeGetManagersEndpoint(svcc),
@@ -83,12 +88,18 @@ func initialiseRouter() *mux.Router {
         e.DecodeEnterLeaveRequest,
         e.EncodeResponse,
 	)
+	/* ---------------------------- Request Handlers ---------------------------- */
+	PostLeaveRequestHandler:=httptransport.NewServer(
+		e.MakePostLeaveRequestEndpoint(svc),
+        e.DecodeGetEmployeeByIdRequest,
+        e.EncodeResponse,
+	)
 
 	/* ------------------------------ router setup ------------------------------ */
 	router := mux.NewRouter()
 	//Login
 	router.HandleFunc("/login", l.Login).Methods("POST")
-	router.HandleFunc("/signup", l.Signup).Methods("POST")
+	router.HandleFunc("/signup", l.SignupEmployee).Methods("POST")
 
 
 	//employee
@@ -97,12 +108,18 @@ func initialiseRouter() *mux.Router {
 	router.Handle("/Employees/{id}", GetEmployeeByIdHandler).Methods("GET")
 	router.Handle("/Employees/{id}", DeleteEmployeeByIdHandler).Methods("DELETE")
 	router.Handle("/Employees/{id}", UpdateEmployeeHandler).Methods("PUT")
+	router.Handle("/Employees/{id}", ApproveEmployeeHandler).Methods("PATCH")
 	
 
 	//EmployeeLeave
 	router.Handle("/Employees/leave/{id}", PostLeavesHandler).Methods("POST")
 	router.Handle("/Employees/leave/{id}", DeleteLeavesHandler).Methods("DELETE")
 	router.Handle("/Employees/leave/{id}",EnterLeaveHandler).Methods("PUT")
+
+
+	//Request
+	router.Handle("/Employees/leave/{id}",PostLeaveRequestHandler ).Methods("POST")
+
 
 	//manager
 	router.Handle("/Managers", GetManagersHandler).Methods("GET")
@@ -121,7 +138,7 @@ func main() {
 		panic(err)
 	}
 
-	dc.DB.AutoMigrate(&e.Employees{}, &m.Manager{}, &l.Users{},e.Leaves{})
+	dc.DB.AutoMigrate(&e.Employees{}, &m.Manager{}, &l.Users{},e.Leaves{},e.Requests{})
 	router := initialiseRouter()
 	defer http.ListenAndServe(":8080", router)
 
