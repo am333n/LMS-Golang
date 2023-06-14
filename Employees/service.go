@@ -148,6 +148,7 @@ func (RepoService) ApproveEmployee(id int) (string, error){
 var ErrEmpty = errors.New("empty employee name")
 
 //* ----------------------------- Leave Functions ---------------------------- */
+//new
 
 func (RepoService) PostLeaves(id int) (string, error) {
 	db, err := dc.GetDB()
