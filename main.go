@@ -15,6 +15,7 @@ import (
 func initialiseRouter() *mux.Router {
 	svc := e.RepoService{}
 	svcc := m.RepoService{}
+	//employee handlers
 	PostEmployeeHandler := httptransport.NewServer(
 		e.MakePostEmployeeEndpoint(svc),
 		e.DecodePostEmployeeRequest,
@@ -40,6 +41,7 @@ func initialiseRouter() *mux.Router {
 		e.DecodeUpdateEmployee,
 		e.EncodeResponse,
 	)
+	//manager handlers
 	GetManagersHandler := httptransport.NewServer(
 		m.MakeGetManagersEndpoint(svcc),
 		m.DecodeGetManagersRequest,
@@ -65,16 +67,43 @@ func initialiseRouter() *mux.Router {
 		m.DecodeUpdateManagerRequest,
 		m.EncodeResponse,
 	)
+	/* ------------------------- Leave Functions handler ------------------------ */
+	PostLeavesHandler:=httptransport.NewServer(
+		e.MakePostLeavesEndpoint(svc),
+        e.DecodeGetEmployeeByIdRequest,
+        e.EncodeResponse,
+	)
+	DeleteLeavesHandler:=httptransport.NewServer(
+		e.MakeDeleteLeavesEndpoint(svc),
+        e.DecodeGetEmployeeByIdRequest,
+        e.EncodeResponse,
+	)
+	EnterLeaveHandler:=httptransport.NewServer(
+		e.MakeEnterLeaveEndpoint(svc),
+        e.DecodeEnterLeaveRequest,
+        e.EncodeResponse,
+	)
+
+	/* ------------------------------ router setup ------------------------------ */
 	router := mux.NewRouter()
 	//Login
 	router.HandleFunc("/login", l.Login).Methods("POST")
 	router.HandleFunc("/signup", l.Signup).Methods("POST")
+
+
 	//employee
 	router.Handle("/Employees", GetEmployeesHandler).Methods("GET")
 	router.Handle("/Employees", PostEmployeeHandler).Methods("POST")
 	router.Handle("/Employees/{id}", GetEmployeeByIdHandler).Methods("GET")
 	router.Handle("/Employees/{id}", DeleteEmployeeByIdHandler).Methods("DELETE")
 	router.Handle("/Employees/{id}", UpdateEmployeeHandler).Methods("PUT")
+	
+
+	//EmployeeLeave
+	router.Handle("/Employees/leave/{id}", PostLeavesHandler).Methods("POST")
+	router.Handle("/Employees/leave/{id}", DeleteLeavesHandler).Methods("DELETE")
+	router.Handle("/Employees/leave/{id}",EnterLeaveHandler).Methods("PUT")
+
 	//manager
 	router.Handle("/Managers", GetManagersHandler).Methods("GET")
 	router.Handle("/Managers", PostManagerHandler).Methods("POST")
@@ -92,7 +121,7 @@ func main() {
 		panic(err)
 	}
 
-	dc.DB.AutoMigrate(&e.Employees{}, &m.Manager{}, &l.Users{})
+	dc.DB.AutoMigrate(&e.Employees{}, &m.Manager{}, &l.Users{},e.Leaves{})
 	router := initialiseRouter()
 	defer http.ListenAndServe(":8080", router)
 

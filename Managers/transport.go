@@ -52,6 +52,7 @@ func DecodePostManagerRequest(_ context.Context, r *http.Request) (interface{}, 
 	if err := json.NewDecoder(r.Body).Decode(&request.manager); err != nil {
 		return nil, err
 	}
+	request.manager.Status="Pending"
 	return request, nil
 }
 func DecodeGetManagerByIdRequest(_ context.Context, r *http.Request) (interface{}, error) {

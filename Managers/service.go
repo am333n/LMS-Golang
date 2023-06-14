@@ -14,6 +14,8 @@ type Manager struct {
 	DOB        string `json:"dob"`
 	Email      string `json:"email"`
 	Phone      int    `json:"phone"`
+	//pending or accepted status
+	Status     string `json:"status"`
 }
 type Service interface {
 	GetManagers() ([]Manager, error)
@@ -50,38 +52,38 @@ func (RepoService) PostManager(manager Manager) (string, error) {
 
 }
 func (RepoService) GetManagerById(id int) (Manager, error) {
-	db,err:=dc.GetDB()
-	var manager	Manager
-	if err!=nil{
-			return Manager{},err
-		}
-	err=db.Where("Id=?",id).First(&manager).Error
-	if err!=nil{
-        return Manager{},err
-    }
-	return manager,nil
+	db, err := dc.GetDB()
+	var manager Manager
+	if err != nil {
+		return Manager{}, err
+	}
+	err = db.Where("Id=?", id).First(&manager).Error
+	if err != nil {
+		return Manager{}, err
+	}
+	return manager, nil
 }
-func (RepoService) DeleteManager(id int)(string,error){
-	db,err:=dc.GetDB()
-	var manager    Manager
-	if err!=nil{
-        return "",err
+func (RepoService) DeleteManager(id int) (string, error) {
+	db, err := dc.GetDB()
+	var manager Manager
+	if err != nil {
+		return "", err
 	}
-	err=db.Where("Id=?",id).Delete(&manager).Error
-	if err!=nil{
-		return "",err
+	err = db.Where("Id=?", id).Delete(&manager).Error
+	if err != nil {
+		return "", err
 	}
-	return "Manager Deleted",nil
+	return "Manager Deleted", nil
 
 }
-func (RepoService) UpdateManager(id int, manager Manager)(string,error){
-	db,err:=dc.GetDB()
-	if err !=nil{
-		return "",err
+func (RepoService) UpdateManager(id int, manager Manager) (string, error) {
+	db, err := dc.GetDB()
+	if err != nil {
+		return "", err
 	}
-	err=db.Where("id=?",id).Updates(&manager).Error
-	if err !=nil{
-		return "",err
+	err = db.Where("id=?", id).Updates(&manager).Error
+	if err != nil {
+		return "", err
 	}
-	return "Manager Successfully Updated",nil
+	return "Manager Successfully Updated", nil
 }
