@@ -72,6 +72,11 @@ func initialiseRouter() *mux.Router {
 		m.DecodeUpdateManagerRequest,
 		m.EncodeResponse,
 	)
+	ApproveManagerHandler:=httptransport.NewServer(
+        m.MakeApproveManagerEndpoint(svcc),
+        m.DecodeGetManagerByIdRequest,
+        m.EncodeResponse,
+    )
 	/* ------------------------- Leave Functions handler ------------------------ */
 	PostLeavesHandler:=httptransport.NewServer(
 		e.MakePostLeavesEndpoint(svc),
@@ -127,8 +132,11 @@ func initialiseRouter() *mux.Router {
 	router.Handle("/Managers/{id}",GetManageByIdHandler).Methods("GET")
 	router.Handle("/Managers/{id}", DeleteManagerHandler).Methods("DELETE")
 	router.Handle("/Managers/{id}",UpdateManagerHandler).Methods("PUT")
-	fmt.Println("The server is running on 8080")
+	router.Handle("/Managers/{id}",ApproveManagerHandler).Methods("PATCH")
 
+	
+	//router
+	fmt.Println("The server is running on 8080")
 	return router
 }
 

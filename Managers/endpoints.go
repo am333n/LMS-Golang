@@ -57,4 +57,14 @@ func MakeUpdateManagerEndpoint(svc Service) endpoint.Endpoint{
 	}
 	
 }
+func MakeApproveManagerEndpoint(svc Service) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (interface{}, error) {
+        req := request.(int)
+        res, err := svc.ApproveManager(req)
+        if err!= nil {
+            return DeleteManagerResponse{res, err.Error()}, nil
+        }
+        return DeleteManagerResponse{res, ""}, nil
 
+    }
+} 

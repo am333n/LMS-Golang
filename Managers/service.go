@@ -23,6 +23,7 @@ type Service interface {
 	GetManagerById(id int) (Manager, error)
 	DeleteManager(id int) (string, error)
 	UpdateManager(id int, manager Manager) (string, error)
+	ApproveManager(id int) (string, error)
 }
 type RepoService struct{}
 
@@ -86,4 +87,23 @@ func (RepoService) UpdateManager(id int, manager Manager) (string, error) {
 		return "", err
 	}
 	return "Manager Successfully Updated", nil
+}
+func (RepoService) ApproveManager(id int) (string, error){
+	db,err:=dc.GetDB()
+	if err!=nil{
+		return "",err
+	}
+	var manager Manager
+	if err := db.Table("managers").Where("id=?", id).Scan(&manager).Error; err != nil {
+		return "No Manager Found", err
+	}
+	if manager.Status == "pending" || manager.Status == ""{
+	
+		manager.Status="Approved"
+		if err:=db.Where("id=?",id).Updates(&manager).Error; err != nil {
+		return "", err
+		}
+		return "The manager is Approved",nil
+	}
+	return "The manager is already approved",nil
 }
