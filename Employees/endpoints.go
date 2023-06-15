@@ -63,15 +63,15 @@ func MakeUpdateEmployeeEndpoint(svc Service) endpoint.Endpoint {
 }
 func MakeApproveEmployeeEndpoint(svc Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-        req := request.(int)
-        res, err := svc.ApproveEmployee(req)
-        if err!= nil {
-            return DeleteEmployeeByIdResponse{res, err.Error()}, nil
-        }
-        return DeleteEmployeeByIdResponse{res, ""}, nil
+		req := request.(int)
+		res, err := svc.ApproveEmployee(req)
+		if err != nil {
+			return DeleteEmployeeByIdResponse{res, err.Error()}, nil
+		}
+		return DeleteEmployeeByIdResponse{res, ""}, nil
 
-    }
-} 
+	}
+}
 
 /* ------------------------- Employee Leave Function ------------------------ */
 
@@ -111,11 +111,40 @@ func MakeEnterLeaveEndpoint(svc Service) endpoint.Endpoint {
 
 func MakePostLeaveRequestEndpoint(svc Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req:=request.(PostLeaveRequestRequest)
-        v, err := svc.PostLeaveRequest(req.request)
-        if err!= nil {
-            return PostLeaveRequestResponse{v, err.Error()}, nil
-        }
-        return PostLeaveRequestResponse{v, ""}, nil
+		req := request.(PostLeaveRequestRequest)
+		v, err := svc.PostLeaveRequest(req.request)
+		if err != nil {
+			return PostLeaveRequestResponse{v, err.Error()}, nil
+		}
+		return PostLeaveRequestResponse{v, ""}, nil
+	}
+}
+func MakeGetRequestEndpoint(svc Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		v, err := svc.GetLeaveRequest()
+		if err != nil {
+			return GetLeaveRequestResponse{v, err.Error()}, nil
+		}
+		return GetLeaveRequestResponse{v, ""}, nil
+	}
+}
+func MakeApproveLeaveRequestEndpoint(svc Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(int)
+		v, err := svc.ApproveLeaveRequest(req)
+		if err != nil {
+			return PostLeaveRequestResponse{v, err.Error()}, nil
+		}
+		return PostLeaveRequestResponse{v, ""}, nil
+	}
+}
+func MakeDeleteLeaveRequestEndpoint(svc Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(int)
+		v, err := svc.DeleteLeaveRequest(req)
+		if err != nil {
+			return PostLeaveRequestResponse{v, err.Error()}, nil
+		}
+		return PostLeaveRequestResponse{v,""}, nil
 	}
 }

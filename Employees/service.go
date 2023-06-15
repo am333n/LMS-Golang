@@ -2,6 +2,7 @@ package Employee
 
 import (
 	"errors"
+	"fmt"
 	dc "lms/Database"
 
 	"gorm.io/gorm"
@@ -58,6 +59,9 @@ type Service interface {
 	EnterLeaves(id int, leave Leaves) ([]Leaves, error)
 	ApproveEmployee(id int) (string, error)
 	PostLeaveRequest(request Requests) (string, error)
+	GetLeaveRequest() ([]Requests, error)
+	ApproveLeaveRequest(id int) (string, error)
+	DeleteLeaveRequest(id int) (string, error)
 }
 type RepoService struct{}
 
@@ -224,39 +228,116 @@ func (RepoService) PostLeaveRequest(request Requests) (string, error) {
 	if err = db.Where("leave_id=?", request.LeaveID).Find(&leave).Error; err != nil {
 		return "Employee Leave Not Set", nil
 	}
-	request.Status="Pending"
-	if leave.MedicalLeave != leave.MedicalTaken && request.Type == "Medical" {
+	request.Status = "Pending"
+	if leave.MedicalLeave > leave.MedicalTaken && request.Type == "Medical" {
 		if err = db.Create(&request).Error; err != nil {
 			return "", err
 		}
-		leave.MedicalLeave = leave.MedicalTaken + request.Days
-		err=db.Updates(&leave).Error
-		if err!= nil {
-			return "Could Not Update Leave", err
-		}
-		return "medical leave Entered", nil
+		// leave.MedicalTaken = leave.MedicalTaken + request.Days
+		// err=db.Updates(&leave).Error
+		// if err!= nil {
+		// 	return "Could Not Update Leave", err
+		// }
+		return "medical Request Entered", nil
 	}
-	if leave.AnnualLeave != leave.AnnualTaken && request.Type == "Annual" {
+	if leave.AnnualLeave > leave.AnnualTaken && request.Type == "Annual" {
 		if err = db.Create(&request).Error; err != nil {
 			return "", err
 		}
-		leave.AnnualLeave = leave.AnnualTaken + request.Days
-		err=db.Updates(&leave).Error
-		if err!= nil {
-			return "Could Not Update Leave", err
-		}
-		return "Annual leave Entered", nil
+		// leave.AnnualTaken = leave.AnnualTaken + request.Days
+		// err=db.Where("employee_id=?",request.EmployeeID).Updates(&leave).Error
+		// if err!= nil {
+		// 	return "Could Not Update Leave", err
+		// }
+		return "Annual Request Entered", nil
 	}
-	if leave.EmergencyLeave != leave.EmergencyTaken && request.Type == "Emergency" {
+	if leave.EmergencyLeave > leave.EmergencyTaken && request.Type == "Emergency" {
 		if err = db.Create(&request).Error; err != nil {
 			return "", err
 		}
-		leave.MedicalLeave = leave.MedicalTaken + request.Days
-		err=db.Updates(&leave).Error
-		if err!= nil {
-			return "Could Not Update Leave", err
-		}
-		return "Emergency leave Entered", nil
+		// leave.EmergencyTaken = leave.EmergencyTaken +  request.Days
+		// err=db.Updates(&leave).Error
+		// if err!= nil {
+		// 	return "Could Not Update Leave", err
+		// }
+		return "Emergency Request Entered", nil
 	}
 	return "bla", nil
+}
+func (RepoService) GetLeaveRequest() ([]Requests, error) {
+	db, err := dc.GetDB()
+	var request []Requests
+	if err != nil {
+		return nil, err
+	}
+	if err = db.Find(&request).Error; err != nil {
+		return nil, err
+	}
+	return request, nil
+}
+func (RepoService) ApproveLeaveRequest(id int) (string, error) {
+	db, err := dc.GetDB()
+	if err != nil {
+		return "", err
+	}
+
+	var request Requests
+	if err := db.Where("request_id = ?", id).First(&request).Error; err != nil {
+		return "",fmt.Errorf("Could not find the request: %w", err)
+	}
+
+	if request.Status == "Approved" {
+		return "", errors.New("The request is already approved")
+	}
+
+	var leave Leaves
+	if err := db.Where("leave_id = ?", request.LeaveID).First(&leave).Error; err != nil {
+		return "",fmt.Errorf("Employee leave balance not found: %w", err)
+	}
+
+	var leaveTaken int
+	switch request.Type {
+	case "Emergency":
+		leaveTaken = leave.EmergencyTaken
+		if leave.EmergencyLeave-leaveTaken < request.Days {
+			return "", errors.New("Requested leave is more than available")
+		}
+		leave.EmergencyTaken += request.Days
+	case "Annual":
+		leaveTaken = leave.AnnualTaken
+		if leave.AnnualLeave-leaveTaken < request.Days {
+			return "", errors.New("Requested leave is more than available")
+		}
+		leave.AnnualTaken += request.Days
+	case "Medical":
+		leaveTaken = leave.MedicalTaken
+		if leave.MedicalLeave-leaveTaken < request.Days {
+			return "", errors.New("Requested leave is more than available")
+		}
+		leave.MedicalTaken += request.Days
+	default:
+		return "", errors.New("Invalid leave type")
+	}
+
+	if err := db.Model(&leave).Where("employee_id = ?", request.EmployeeID).Updates(&leave).Error; err != nil {
+		return "",fmt.Errorf("Could not update leave: %w", err)
+	}
+
+	request.Status = "Approved"
+	if err := db.Model(&request).Where("request_id = ?", id).Updates(&request).Error; err != nil {
+		return "",fmt.Errorf("Could not approve request: %w", err)
+	}
+
+	return "Successfully Leave Balance Updated", nil
+}
+func (RepoService) DeleteLeaveRequest(id int) (string, error) {
+	db, err :=dc.GetDB()
+	var request Requests
+	if err != nil {
+		return "",fmt.Errorf("Could not Connect to Database: %w", err)
+	}
+	if err:=db.Model(&request).Where("request_id=?",id).Delete(&request).Error; err !=nil{
+		return "",fmt.Errorf("Could not Delete Request: %w", err)
+	}
+	return "Request Successfully Deleted",nil
 }

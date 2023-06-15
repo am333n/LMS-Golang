@@ -49,12 +49,18 @@ type EnterLeaveResponse struct {
     V   []Leaves `json:"Result"`
     Err string `json:"err,omitempty"` // errors don't JSON-marshal, so we use a string
 }
+/* ----------------------- Request Request & Response ----------------------- */
+
 type PostLeaveRequestRequest struct {
     request Requests
 }
 type PostLeaveRequestResponse struct{
-	V string `json:"Output"`
+	V string `json:"Output,omitempty"`
 	Err string `json:"err,omitempty"` // errors don't JSON-marshal, so we use a string
+}
+type GetLeaveRequestResponse struct{
+	V []Requests
+	Err string `json:"err,omitempty"`
 }
 
 
@@ -132,5 +138,9 @@ func DecodePostLeaveRequest(_ context.Context,r *http.Request)(interface{},error
         return nil, err
     }
     return request, nil
+}
+func DecodeGetRequestRequest(_ context.Context,r *http.Request)(interface{},error){
+	var request struct{}
+	return request,nil
 }
 
