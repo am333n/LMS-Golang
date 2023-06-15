@@ -49,6 +49,14 @@ type EnterLeaveResponse struct {
     V   []Leaves `json:"Result"`
     Err string `json:"err,omitempty"` // errors don't JSON-marshal, so we use a string
 }
+type PostLeaveRequestRequest struct {
+    request Requests
+}
+type PostLeaveRequestResponse struct{
+	V string `json:"Output"`
+	Err string `json:"err,omitempty"` // errors don't JSON-marshal, so we use a string
+}
+
 
 /* ---------------------- Employee CRUD Encode & Decode ---------------------- */
 
@@ -118,5 +126,11 @@ func DecodeEnterLeaveRequest(_ context.Context, r *http.Request)(interface{},err
     return request, nil
 }
 /* ---------------------- Leave Request Encode & Decode --------------------- */
-
+func DecodePostLeaveRequest(_ context.Context,r *http.Request)(interface{},error){
+	var request PostLeaveRequestRequest
+    if err:=json.NewDecoder(r.Body).Decode(&request.request); err!=nil{
+        return nil, err
+    }
+    return request, nil
+}
 

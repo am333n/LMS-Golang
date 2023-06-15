@@ -91,7 +91,7 @@ func initialiseRouter() *mux.Router {
 	/* ---------------------------- Request Handlers ---------------------------- */
 	PostLeaveRequestHandler:=httptransport.NewServer(
 		e.MakePostLeaveRequestEndpoint(svc),
-        e.DecodeGetEmployeeByIdRequest,
+        e.DecodePostLeaveRequest,
         e.EncodeResponse,
 	)
 
@@ -118,7 +118,7 @@ func initialiseRouter() *mux.Router {
 
 
 	//Request
-	router.Handle("/Employees/leave/{id}",PostLeaveRequestHandler ).Methods("POST")
+	router.Handle("/Employees/leave/request/",PostLeaveRequestHandler ).Methods("POST")
 
 
 	//manager

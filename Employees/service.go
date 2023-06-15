@@ -32,17 +32,16 @@ type Leaves struct {
 	EmergencyTaken int `json:"Emergency_Taken"`
 }
 type Requests struct {
-	RequestID int `gorm:"autoIncrement"`
-	EmployeeID int `json:"employee_id"`
-	LeaveID int `json:"leave_id"`
-	Type string `json:"type"`
-	DateFrom string `json:"date_from"`
-	DateTo string `json:"date_to"`
-	Days int `json:"days"`
-	Reason string `json:"reason"`
-	Status string `json:"status"`
+	RequestID  int    `gorm:"autoIncrement"`
+	EmployeeID int    `json:"employee_id"`
+	LeaveID    int    `json:"leave_id"`
+	Type       string `json:"type"`
+	DateFrom   string `json:"date_from"`
+	DateTo     string `json:"date_to"`
+	Days       int    `json:"days"`
+	Reason     string `json:"reason"`
+	Status     string `json:"status"`
 }
-
 
 /* -------------------------------------------------------------------------- */
 //*=============================== Service =================================*/
@@ -56,8 +55,9 @@ type Service interface {
 	UpdateEmployee(id int, employee Employees) (string, Employees, error)
 	PostLeaves(id int) (string, error)
 	DeleteLeaves(id int) (string, error)
-	EnterLeaves(id int,leave Leaves) ([]Leaves, error)
+	EnterLeaves(id int, leave Leaves) ([]Leaves, error)
 	ApproveEmployee(id int) (string, error)
+	PostLeaveRequest(request Requests) (string, error)
 }
 type RepoService struct{}
 
@@ -125,25 +125,26 @@ func (RepoService) UpdateEmployee(id int, employee Employees) (string, Employees
 	}
 	return "The data is updated", employee, nil
 }
-func (RepoService) ApproveEmployee(id int) (string, error){
-	db,err:=dc.GetDB()
-	if err!=nil{
-		return "",err
+func (RepoService) ApproveEmployee(id int) (string, error) {
+	db, err := dc.GetDB()
+	if err != nil {
+		return "", err
 	}
 	var employee Employees
 	if err := db.Table("employees").Where("id=?", id).Scan(&employee).Error; err != nil {
 		return "No Employee Found", err
 	}
-	if employee.Status == "pending" || employee.Status == ""{
-	
-		employee.Status="Approved"
-		if err:=db.Where("id=?",id).Updates(&employee).Error; err != nil {
-		return "", err
+	if employee.Status == "pending" || employee.Status == "" {
+
+		employee.Status = "Approved"
+		if err := db.Where("id=?", id).Updates(&employee).Error; err != nil {
+			return "", err
 		}
-		return "The employee is Approved",nil
+		return "The employee is Approved", nil
 	}
-	return "The employee is already approved",nil
+	return "The employee is already approved", nil
 }
+
 // ErrEmpty is returned when input string is empty
 var ErrEmpty = errors.New("empty employee name")
 
@@ -195,16 +196,67 @@ func (RepoService) DeleteLeaves(id int) (string, error) {
 func (RepoService) EnterLeaves(id int, leave Leaves) ([]Leaves, error) {
 	var leaves []Leaves
 	db, err := dc.GetDB()
-    if err!= nil {
-        return nil, err
-    }
-    err = db.Where("employee_id=?", id).Updates(&leave).Error
-	if err!= nil {
-        return nil, err
-    }
+	if err != nil {
+		return nil, err
+	}
+	err = db.Where("employee_id=?", id).Updates(&leave).Error
+	if err != nil {
+		return nil, err
+	}
 	db.Find(&leaves)
-    return leaves, nil
+	return leaves, nil
 }
 
 /* ---------------------------- Request Functions --------------------------- */
 
+func (RepoService) PostLeaveRequest(request Requests) (string, error) {
+	var employee Employees
+	var leave Leaves
+	db, err := dc.GetDB()
+	db, err = dc.GetDB()
+	if err != nil {
+		return "", err
+	}
+	if err = db.Table("employees").Where("id=?", request.EmployeeID).Scan(&employee).Error; err != nil {
+		return "No such employee", nil
+
+	}
+	if err = db.Where("leave_id=?", request.LeaveID).Find(&leave).Error; err != nil {
+		return "Employee Leave Not Set", nil
+	}
+	request.Status="Pending"
+	if leave.MedicalLeave != leave.MedicalTaken && request.Type == "Medical" {
+		if err = db.Create(&request).Error; err != nil {
+			return "", err
+		}
+		leave.MedicalLeave = leave.MedicalTaken + request.Days
+		err=db.Updates(&leave).Error
+		if err!= nil {
+			return "Could Not Update Leave", err
+		}
+		return "medical leave Entered", nil
+	}
+	if leave.AnnualLeave != leave.AnnualTaken && request.Type == "Annual" {
+		if err = db.Create(&request).Error; err != nil {
+			return "", err
+		}
+		leave.AnnualLeave = leave.AnnualTaken + request.Days
+		err=db.Updates(&leave).Error
+		if err!= nil {
+			return "Could Not Update Leave", err
+		}
+		return "Annual leave Entered", nil
+	}
+	if leave.EmergencyLeave != leave.EmergencyTaken && request.Type == "Emergency" {
+		if err = db.Create(&request).Error; err != nil {
+			return "", err
+		}
+		leave.MedicalLeave = leave.MedicalTaken + request.Days
+		err=db.Updates(&leave).Error
+		if err!= nil {
+			return "Could Not Update Leave", err
+		}
+		return "Emergency leave Entered", nil
+	}
+	return "bla", nil
+}

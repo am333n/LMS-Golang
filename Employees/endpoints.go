@@ -111,7 +111,11 @@ func MakeEnterLeaveEndpoint(svc Service) endpoint.Endpoint {
 
 func MakePostLeaveRequestEndpoint(svc Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-
-		return nil,nil
+		req:=request.(PostLeaveRequestRequest)
+        v, err := svc.PostLeaveRequest(req.request)
+        if err!= nil {
+            return PostLeaveRequestResponse{v, err.Error()}, nil
+        }
+        return PostLeaveRequestResponse{v, ""}, nil
 	}
 }
