@@ -109,7 +109,16 @@ func initialiseRouter() *mux.Router {
 		e.DecodeDeleteEmployeeByIdRequest,
 		e.EncodeResponse,
 	)
-
+	GetLeavesHandler:=httptransport.NewServer(
+	e.MakeGetLeavesEndpoint(svc),
+	e.DecodeGetEmployeesRequest,
+	e.EncodeResponse,
+	)
+	GetLeavesByIdHandler:=httptransport.NewServer(
+		e.MakeGetLeavesByIdEndpoint(svc),
+		e.DecodeDeleteEmployeeByIdRequest,
+		e.EncodeResponse,
+	)
 	/* ------------------------------ router setup ------------------------------ */
 	router := mux.NewRouter()
 	//Login
@@ -125,9 +134,11 @@ func initialiseRouter() *mux.Router {
 	router.Handle("/Employees/{id}", ApproveEmployeeHandler).Methods("PATCH")
 
 	//EmployeeLeave
+	router.Handle("/Employees/Leave/",GetLeavesHandler).Methods("GET")
 	router.Handle("/Employees/leave/{id}", PostLeavesHandler).Methods("POST")
 	router.Handle("/Employees/leave/{id}", DeleteLeavesHandler).Methods("DELETE")
 	router.Handle("/Employees/leave/{id}", EnterLeaveHandler).Methods("PUT")
+	router.Handle("/Employees/leave/{id}",GetLeavesByIdHandler).Methods("GET")
 
 	//Request
 	router.Handle("/Employees/leave/request/", PostLeaveRequestHandler).Methods("POST")

@@ -38,7 +38,7 @@ type UpdateEmployeeResponse struct{
     V string `json:"Result"`
 	A Employees `json:"Output"`
     Err string    `json:"err,omitempty"` // errors don't JSON-marshal, so we use a string
-}
+} 
 /* -------------------- Leave Function Request & Response ------------------- */
 
 type EnterLeaveRequest struct {
@@ -48,6 +48,10 @@ type EnterLeaveRequest struct {
 type EnterLeaveResponse struct {
     V   []Leaves `json:"Result"`
     Err string `json:"err,omitempty"` // errors don't JSON-marshal, so we use a string
+}
+type GetLeavesByIdResponse struct{
+	V Leaves `json:"Response"`
+	Err string `json:"err,omitempty"`
 }
 /* ----------------------- Request Request & Response ----------------------- */
 

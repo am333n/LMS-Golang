@@ -106,6 +106,15 @@ func MakeEnterLeaveEndpoint(svc Service) endpoint.Endpoint {
 		return EnterLeaveResponse{v, ""}, nil
 	}
 }
+func MakeGetLeavesEndpoint(svc Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		v, err := svc.GetLeaves()
+		if err != nil {
+			return EnterLeaveResponse{v, err.Error()}, nil
+		}
+		return EnterLeaveResponse{v, ""}, nil
+	}
+}
 
 /* ---------------------------- Request Endpoints --------------------------- */
 
@@ -145,6 +154,16 @@ func MakeDeleteLeaveRequestEndpoint(svc Service) endpoint.Endpoint {
 		if err != nil {
 			return PostLeaveRequestResponse{v, err.Error()}, nil
 		}
-		return PostLeaveRequestResponse{v,""}, nil
+		return PostLeaveRequestResponse{v, ""}, nil
+	}
+}
+func MakeGetLeavesByIdEndpoint(svc Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(int)
+		v, err := svc.GetLeavesById(req)
+		if err != nil {
+			return GetLeavesByIdResponse{v, err.Error()}, nil
+		}
+		return GetLeavesByIdResponse{v, ""}, nil
 	}
 }

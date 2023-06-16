@@ -62,6 +62,8 @@ type Service interface {
 	GetLeaveRequest() ([]Requests, error)
 	ApproveLeaveRequest(id int) (string, error)
 	DeleteLeaveRequest(id int) (string, error)
+	GetLeaves()([]Leaves,error)
+	GetLeavesById(id int)(Leaves,error)
 }
 type RepoService struct{}
 
@@ -166,6 +168,9 @@ func (RepoService) PostLeaves(id int) (string, error) {
 	if err := db.Session(&gorm.Session{}).Where("id =?", id).First(&employee).Error; err != nil {
 		return "Employee Not Found", nil
 	}
+	if employee.Status=="Pending"{
+		return "",fmt.Errorf("Employee is not Approved %w",err)
+	}
 	//to check for already set entry in leave
 	if err := db.Session(&gorm.Session{}).Where("employee_id=?", id).First(&leave).Error; err != nil {
 		leave.EmployeeID = id
@@ -210,6 +215,29 @@ func (RepoService) EnterLeaves(id int, leave Leaves) ([]Leaves, error) {
 	db.Find(&leaves)
 	return leaves, nil
 }
+func (RepoService)GetLeaves()([]Leaves,error){
+	var leaves []Leaves
+	db,err:=dc.GetDB()
+	if err!=nil{
+		return nil,err
+	}
+	if err:=db.Find(&leaves).Error;err!=nil{
+		return nil,fmt.Errorf("Could not get Leaves: %w",err)
+	}
+	return leaves,nil
+}
+func (RepoService)GetLeavesById(id int)(Leaves,error){
+	var leaves Leaves
+	db,err:=dc.GetDB()
+	if err!=nil{
+		return leaves,fmt.Errorf("Could not connect to db")
+	}
+	if err:=db.Where("employee_id=?",id).First(&leaves).Error;err !=nil{
+		return leaves,fmt.Errorf("Could not find records")
+	}
+	return leaves,nil
+}
+
 
 /* ---------------------------- Request Functions --------------------------- */
 
@@ -275,6 +303,7 @@ func (RepoService) GetLeaveRequest() ([]Requests, error) {
 	}
 	return request, nil
 }
+//todo check json tags
 func (RepoService) ApproveLeaveRequest(id int) (string, error) {
 	db, err := dc.GetDB()
 	if err != nil {
@@ -283,7 +312,7 @@ func (RepoService) ApproveLeaveRequest(id int) (string, error) {
 
 	var request Requests
 	if err := db.Where("request_id = ?", id).First(&request).Error; err != nil {
-		return "",fmt.Errorf("Could not find the request: %w", err)
+		return "", fmt.Errorf("Could not find the request: %w", err)
 	}
 
 	if request.Status == "Approved" {
@@ -292,7 +321,7 @@ func (RepoService) ApproveLeaveRequest(id int) (string, error) {
 
 	var leave Leaves
 	if err := db.Where("leave_id = ?", request.LeaveID).First(&leave).Error; err != nil {
-		return "",fmt.Errorf("Employee leave balance not found: %w", err)
+		return "", fmt.Errorf("Employee leave balance not found: %w", err)
 	}
 
 	var leaveTaken int
@@ -320,24 +349,25 @@ func (RepoService) ApproveLeaveRequest(id int) (string, error) {
 	}
 
 	if err := db.Model(&leave).Where("employee_id = ?", request.EmployeeID).Updates(&leave).Error; err != nil {
-		return "",fmt.Errorf("Could not update leave: %w", err)
+		return "", fmt.Errorf("Could not update leave: %w", err)
 	}
 
 	request.Status = "Approved"
 	if err := db.Model(&request).Where("request_id = ?", id).Updates(&request).Error; err != nil {
-		return "",fmt.Errorf("Could not approve request: %w", err)
+		return "", fmt.Errorf("Could not approve request: %w", err)
 	}
 
 	return "Successfully Leave Balance Updated", nil
 }
+//TODO Reject Request
 func (RepoService) DeleteLeaveRequest(id int) (string, error) {
-	db, err :=dc.GetDB()
+	db, err := dc.GetDB()
 	var request Requests
 	if err != nil {
-		return "",fmt.Errorf("Could not Connect to Database: %w", err)
+		return "", fmt.Errorf("Could not Connect to Database: %w", err)
 	}
-	if err:=db.Model(&request).Where("request_id=?",id).Delete(&request).Error; err !=nil{
-		return "",fmt.Errorf("Could not Delete Request: %w", err)
+	if err := db.Model(&request).Where("request_id=?", id).Delete(&request).Error; err != nil {
+		return "", fmt.Errorf("Could not Delete Request: %w", err)
 	}
-	return "Request Successfully Deleted",nil
+	return "Request Successfully Deleted", nil
 }
