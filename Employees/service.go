@@ -69,7 +69,7 @@ type Service interface {
 
 type RepoService struct{}
 func NewService() Service {
-	return &RepoService
+	return &RepoService{}
 }
 
 //* ------------------------- Employee CRUD Functions ------------------------ */

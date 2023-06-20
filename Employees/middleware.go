@@ -6,7 +6,7 @@ import (
 	"github.com/go-kit/kit/log"
 )
 
-//write a middleware in go kit to authenticate the request
+
 
 type Middleware func(Service) Service
 
