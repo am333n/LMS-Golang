@@ -6,8 +6,8 @@ import (
 	dc "lms/Database"
 	"net/http"
 	"time"
-
 	"github.com/golang-jwt/jwt"
+	"github.com/gorilla/mux"
 	"gorm.io/gorm"
 )
 
@@ -15,17 +15,24 @@ var jwtKey = []byte("secretkey")
 
 type Users struct {
 	gorm.Model
-	Id int `gorm:"autoIncrement"`
+	loginId  int    `gorm:"autoIncrement"`
 	Username string `json:"username"`
 	Password string `json:"password"`
 	Type     string `json:"type"`
 }
 
 func SignupEmployee(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
 	w.Header().Set("Content-Type", "application/json")
 	var user Users
 	json.NewDecoder(r.Body).Decode(&user)
-	user.Type="employee"
+	user.Type = params["type"]
+	if user.Type == "employee" {
+		
+	}
+	if user.Type == "admin" {
+
+	}
 	dc.DB.Create(&user)
 	json.NewEncoder(w).Encode(user)
 
@@ -36,32 +43,35 @@ type Credentials struct {
 	Password string `json:"password"`
 }
 type Claims struct {
-	Id int `json:"id"`
+	Id       int    `json:"id"`
 	Username string `json:"username"`
 	jwt.StandardClaims
 }
 
-func getLoginDetails(w http.ResponseWriter, r *http.Request) (Details, Credentials) {
+func getLoginDetails(w http.ResponseWriter, r *http.Request) (Details, Credentials,error) {
 	w.Header().Set("Content-Type", "application/json")
 	var credentials Credentials
 	json.NewDecoder(r.Body).Decode(&credentials)
 	var user Users
 	var details Details
-	err := dc.DB.Where("username =?", credentials.Username).First(&user)
-	if err != nil {
+	db,err:=dc.GetDB()
+	if err!=nil{
+		return details,credentials, fmt.Errorf("%w",err)
+	}
+	if err := db.Where("username=?", credentials.Username).First(&user).Error; err != nil {
 		fmt.Printf("%s", "cannot get details")
 	}
-	details.Id = user.Id
+	details.Id = user.loginId
 	details.Username = user.Username
 	details.Password = user.Password
 	// json.NewEncoder(w).Encode(&details)
 	// json.NewEncoder(w).Encode(&credentials)
-	return details, credentials
+	return details, credentials,nil
 
 }
 
 type Details struct {
-	Id int `json:"id"`
+	Id       int    `json:"id"`
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
@@ -69,7 +79,7 @@ type Details struct {
 var details Details
 
 func Login(w http.ResponseWriter, r *http.Request) {
-	details, credentials := getLoginDetails(w, r)
+	details, credentials,err:= getLoginDetails(w, r)
 	expectedPassword := credentials.Password
 	if expectedPassword != details.Password {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -77,7 +87,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	}
 	experationTime := time.Now().Add(time.Minute * 5)
 	claims := &Claims{
-		Id : details.Id,
+		Id:       details.Id,
 		Username: credentials.Username,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: experationTime.Unix(),
@@ -94,7 +104,6 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		Value:   tokenString,
 		Expires: experationTime,
 	})
-
 }
 func ValidateToken(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("token")

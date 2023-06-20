@@ -65,7 +65,12 @@ type Service interface {
 	GetLeaves()([]Leaves,error)
 	GetLeavesById(id int)(Leaves,error)
 }
+
+
 type RepoService struct{}
+func NewService() Service {
+	return &RepoService
+}
 
 //* ------------------------- Employee CRUD Functions ------------------------ */
 
