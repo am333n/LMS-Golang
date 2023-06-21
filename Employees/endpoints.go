@@ -36,7 +36,6 @@ func MakeGetEmployeesByIdEndpoint(svc Service) endpoint.Endpoint {
 			return GetEmployeeByIdResponse{v, err.Error()}, nil
 		}
 		return GetEmployeeByIdResponse{v, ""}, nil
-
 	}
 }
 func MakeDeleteEmployeesByIdEndpoint(svc Service) endpoint.Endpoint {
@@ -48,7 +47,6 @@ func MakeDeleteEmployeesByIdEndpoint(svc Service) endpoint.Endpoint {
 		}
 		return DeleteEmployeeByIdResponse{result, ""}, nil
 	}
-
 }
 func MakeUpdateEmployeeEndpoint(svc Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
@@ -58,7 +56,6 @@ func MakeUpdateEmployeeEndpoint(svc Service) endpoint.Endpoint {
 			return UpdateEmployeeResponse{result, res, err.Error()}, nil
 		}
 		return UpdateEmployeeResponse{result, res, ""}, nil
-
 	}
 }
 func MakeApproveEmployeeEndpoint(svc Service) endpoint.Endpoint {
@@ -69,7 +66,6 @@ func MakeApproveEmployeeEndpoint(svc Service) endpoint.Endpoint {
 			return DeleteEmployeeByIdResponse{res, err.Error()}, nil
 		}
 		return DeleteEmployeeByIdResponse{res, ""}, nil
-
 	}
 }
 
