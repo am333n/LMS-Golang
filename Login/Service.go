@@ -141,3 +141,4 @@ func clearCookie(w http.ResponseWriter, name string) {
 	http.SetCookie(w, cookie)
 }
 /* ----------------------------------- lll ---------------------------------- */
+var abc int
