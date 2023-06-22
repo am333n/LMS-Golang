@@ -57,3 +57,16 @@ func Middleware() endpoint.Middleware {
 		}
 	}
 }
+func EmployeeEntryMiddleware() endpoint.Middleware {
+	return func(next endpoint.Endpoint) endpoint.Endpoint {
+		return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+			usertype:=ctx.Value("userType")
+			switch usertype{
+			case 1: 
+				return next(ctx,nil)
+			default:
+				return next(ctx,common.ErrLoginInvalid)
+			}
+		}
+	}
+}
