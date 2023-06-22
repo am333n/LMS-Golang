@@ -69,5 +69,7 @@ func EncodeLoginResponse(_ context.Context, w http.ResponseWriter, response inte
 		http.Error(w, "Failed to set cookie", http.StatusInternalServerError)
 		return nil
 	}
+
+
 	return json.NewEncoder(w).Encode(res.loggedUser.Details)
 }

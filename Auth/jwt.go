@@ -12,14 +12,15 @@ import (
 var jwtSecret = []byte("heisenberg")
 
 // GenerateJWTToken generates a new JWT token for the given username.
-func GenerateJWTToken(username string, id int) (string, error) {
+func GenerateJWTToken(username string, id int, userType int) (string, error) {
 	// Create a new JWT token
 	token := jwt.New(jwt.SigningMethodHS256)
 
 	// Set the claims for the token
 	claims := token.Claims.(jwt.MapClaims)
 	claims["username"] = username
-	claims["exp"] = time.Now().Add(time.Hour * 24).Unix() // Set the token expiration time
+	claims["exp"] = time.Now().Add(time.Minute * 30).Unix() // Set the token expiration time
+	claims["userType"] = userType
 
 	// Sign the token with the secret key
 	tokenString, err := token.SignedString(jwtSecret)

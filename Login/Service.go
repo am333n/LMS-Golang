@@ -85,13 +85,13 @@ func (rs RepoService) Login(credentials Credentials) (LoggedInUser, error) {
 		}
 		return LoggedInUser{}, err
 	}
-	tokenString, err := auth.GenerateJWTToken(user.Username, user.loginId)
-	if err != nil {
-		fmt.Printf("Failed to generate JWT token: %v\n", err)
-	}
 	UserTypeInt, err := ValidateUserType(user)
 	if err != nil {
 		return LoggedInUser{}, common.ErrLoginInvalid
+	}
+	tokenString, err := auth.GenerateJWTToken(user.Username, user.loginId, UserTypeInt)
+	if err != nil {
+		fmt.Printf("Failed to generate JWT token: %v\n", err)
 	}
 
 	loggedUser := LoggedInUser{

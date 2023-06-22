@@ -45,7 +45,7 @@ func Middleware() endpoint.Middleware {
 			// c2 := context.WithValue(ctx, common.CurrentUserNameKey, claims.UserEmail)
 			c2 := context.WithValue(ctx, "UserID", claims["username"])
 			c2 = context.WithValue(ctx, "exp", claims["exp"])
-			// //c2 = context.WithValue(c2, common.CurrentUserEmployeeIDKey, claims.UserEmployeeID)
+			c2 = context.WithValue(c2, "userType", claims["userType"])
 			// c2 = context.WithValue(c2, common.CurrentTenantUserIDKey, claims.TenantUserID)
 			// c2 = context.WithValue(c2, common.CurrentTenantIDKey, claims.TenantID)
 			// c2 = context.WithValue(c2, common.CurrentEditionIDKey, claims.EditionID)
