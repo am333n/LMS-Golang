@@ -5,7 +5,8 @@ import (
 	"errors"
 	"fmt"
 	dc "lms/Database"
-	auth "lms/Login/Auth"
+	auth "lms/Auth"
+	"lms/common"
 	"net/http"
 	"time"
 
@@ -80,7 +81,7 @@ func (rs RepoService) Login(credentials Credentials) (LoggedInUser, error) {
 	var user Users
 	if err := db.Model(&user).Where("username = ? AND password = ?", credentials.Username, credentials.Password).First(&user).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return LoggedInUser{}, errors.New("invalid credentials")
+			return LoggedInUser{}, common.ErrInvalidCredentials
 		}
 		return LoggedInUser{}, err
 	}
@@ -90,7 +91,7 @@ func (rs RepoService) Login(credentials Credentials) (LoggedInUser, error) {
 	}
 	UserTypeInt, err := ValidateUserType(user)
 	if err != nil {
-		return LoggedInUser{}, err
+		return LoggedInUser{}, common.ErrLoginInvalid
 	}
 
 	loggedUser := LoggedInUser{

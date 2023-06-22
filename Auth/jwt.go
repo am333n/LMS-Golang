@@ -2,6 +2,7 @@ package auth
 
 import (
 	"fmt"
+	"lms/common"
 	"net/http"
 	"time"
 
@@ -41,4 +42,13 @@ func SetCookie(w http.ResponseWriter, name, value string, expires time.Duration,
 
 	http.SetCookie(w, cookie)
 	return nil
+}
+func extractTokenFromRequest(r *http.Request) (string, error) {
+	// Implement the logic to extract the JWT token from the request, e.g., from headers or cookies
+	cookie, err := r.Cookie("logintoken")
+	if err != nil {
+		return "", common.ErrCookieNotFound
+	}
+	// Return the token value
+	return cookie.Value, nil
 }

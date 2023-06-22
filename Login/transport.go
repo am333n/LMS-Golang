@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	auth "lms/Login/Auth"
+	auth "lms/Auth"
 	"net/http"
 	"time"
 

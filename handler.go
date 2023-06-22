@@ -4,9 +4,14 @@ import (
 	"fmt"
 	e "lms/Employees"
 	login "lms/Login"
+	auth "lms/Auth"
 	m "lms/Managers"
+	"lms/common"
 	"os"
+
+	"github.com/go-kit/kit/transport"
 	httptransport "github.com/go-kit/kit/transport/http"
+	khttp "github.com/go-kit/kit/transport/http"
 	"github.com/go-kit/log"
 	"github.com/gorilla/mux"
 )
@@ -18,15 +23,23 @@ func initialiseRouter() *mux.Router {
 	svcc := m.RepoService{}
 	svccc := login.RepoService{}
 	//employee handlers
+	opts := []khttp.ServerOption{
+		khttp.ServerErrorHandler(transport.NewLogErrorHandler(logger)),
+		khttp.ServerErrorEncoder(common.EncodeError),
+		khttp.ServerBefore(auth.ExtractTokenData),
+	}
+
 	PostEmployeeHandler := httptransport.NewServer(
 		e.MakePostEmployeeEndpoint(svc),
 		e.DecodePostEmployeeRequest,
 		e.EncodeResponse,
 	)
+	getEmployeesEndPoint := auth.Middleware()(e.MakeGetEmployeesEndpoint(svc))
 	GetEmployeesHandler := httptransport.NewServer(
-		e.MakeGetEmployeesEndpoint(svc),
+		getEmployeesEndPoint,
 		e.DecodeGetEmployeesRequest,
 		e.EncodeResponse,
+		opts...,
 	)
 	GetEmployeeByIdHandler := httptransport.NewServer(
 		e.MakeGetEmployeesByIdEndpoint(svc),
@@ -128,19 +141,18 @@ func initialiseRouter() *mux.Router {
 		login.DecodeSignupRequest,
 		e.EncodeResponse,
 	)
-	LoginHandler:=httptransport.NewServer(
+	LoginHandler := httptransport.NewServer(
 		login.MakeLoginEndpoint(svccc),
 		login.DecodeLoginRequest,
 		login.EncodeLoginResponse,
 	)
 
-
 	/* ------------------------------ router setup ------------------------------ */
 	router := mux.NewRouter()
 	//Login
-	router.Handle("/login", LoginHandler ).Methods("POST")
+	router.Handle("/login", LoginHandler).Methods("POST")
 	router.Handle("/signup/{type}", Signuphandler).Methods("POST")
-	router.HandleFunc("/logout",login.Logout).Methods("POST")
+	router.HandleFunc("/logout", login.Logout).Methods("POST")
 
 	//employee
 	router.Handle("/Employees", GetEmployeesHandler).Methods("GET")
