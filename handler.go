@@ -41,31 +41,41 @@ func initialiseRouter() *mux.Router {
 		e.EncodeResponse,
 		opts...,
 	)
+	MakeGetEmployeesByIdEndpoint := auth.Middleware()(e.MakeGetEmployeesByIdEndpoint(svc))
 	GetEmployeeByIdHandler := httptransport.NewServer(
-		e.MakeGetEmployeesByIdEndpoint(svc),
+		MakeGetEmployeesByIdEndpoint,
 		e.DecodeGetEmployeeByIdRequest,
 		e.EncodeResponse,
+		opts...,
+	
 	)
+	MakeDeleteEmployeesByIdEndpoint := auth.Middleware()(e.MakeDeleteEmployeesByIdEndpoint(svc))
 	DeleteEmployeeByIdHandler := httptransport.NewServer(
-		e.MakeDeleteEmployeesByIdEndpoint(svc),
+		MakeDeleteEmployeesByIdEndpoint,
 		e.DecodeDeleteEmployeeByIdRequest,
 		e.EncodeResponse,
+		opts...,
 	)
+	MakeUpdateEmployeeEndpoint := auth.Middleware()(e.MakeUpdateEmployeeEndpoint(svc))
 	UpdateEmployeeHandler := httptransport.NewServer(
-		e.MakeUpdateEmployeeEndpoint(svc),
+		MakeUpdateEmployeeEndpoint,
 		e.DecodeUpdateEmployee,
 		e.EncodeResponse,
+		opts...,
 	)
+	MakeApproveEmployeeEndpoint := auth.Middleware()(e.MakeApproveEmployeeEndpoint(svc))
 	ApproveEmployeeHandler := httptransport.NewServer(
-		e.MakeApproveEmployeeEndpoint(svc),
+		MakeApproveEmployeeEndpoint,
 		e.DecodeDeleteEmployeeByIdRequest,
 		e.EncodeResponse,
+		opts...,
 	)
 	//manager handlers
 	GetManagersHandler := httptransport.NewServer(
 		m.MakeGetManagersEndpoint(svcc),
 		m.DecodeGetManagersRequest,
 		m.EncodeResponse,
+		
 	)
 	PostManagerHandler := httptransport.NewServer(
 		m.MakePostManagerEndpoint(svcc),
