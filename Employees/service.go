@@ -72,7 +72,7 @@ type RepoService struct{}
 func NewService() Service {
 	return &RepoService{}
 }
-
+var ameen int
 //* ------------------------- Employee CRUD Functions ------------------------ */
 
 func (RepoService) PostEmployee(employee Employees) (Employees, error) {
