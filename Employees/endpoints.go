@@ -2,9 +2,32 @@ package Employee
 
 import (
 	"context"
+	auth "lms/Auth"
 
 	"github.com/go-kit/kit/endpoint"
 )
+
+/* --------------------------- Endpoint Connection -------------------------- */
+
+type Endpoints struct {
+	PostEmployeeEndpoint        endpoint.Endpoint
+	GetEmployeesEndpoint        endpoint.Endpoint
+	DeleteEmployeesByIdEndpoint endpoint.Endpoint
+	UpdateEmployeeEndpoint      endpoint.Endpoint
+	ApproveEmployeeEndpoint     endpoint.Endpoint
+	GetEmployeesByIdEndpoint    endpoint.Endpoint
+}
+
+func MakeServerEndpoints(s Service) Endpoints {
+	return Endpoints{
+		PostEmployeeEndpoint:        auth.Middleware()(MakePostEmployeeEndpoint(s)),
+		GetEmployeesEndpoint:        auth.Middleware()(MakeGetEmployeesEndpoint(s)),
+		DeleteEmployeesByIdEndpoint: auth.Middleware()(MakeDeleteEmployeesByIdEndpoint(s)),
+		UpdateEmployeeEndpoint:      auth.Middleware()(MakeUpdateEmployeeEndpoint(s)),
+		ApproveEmployeeEndpoint:     auth.Middleware()(MakeApproveEmployeeEndpoint(s)),
+		GetEmployeesByIdEndpoint:    auth.Middleware()(MakeGetEmployeesByIdEndpoint(s)),
+	}
+}
 
 /* ------------------------ Employee CRUD operations ------------------------ */
 
@@ -23,9 +46,9 @@ func MakeGetEmployeesEndpoint(svc Service) endpoint.Endpoint {
 		//req := request.(GetEmployeesRequest)
 		v, err := svc.GetEmployees()
 		if err != nil {
-			return GetEmployeesResponse{v, err.Error()}, nil
+			return v, err
 		}
-		return GetEmployeesResponse{v, ""}, nil
+		return v, nil
 	}
 }
 func MakeGetEmployeesByIdEndpoint(svc Service) endpoint.Endpoint {
@@ -36,7 +59,6 @@ func MakeGetEmployeesByIdEndpoint(svc Service) endpoint.Endpoint {
 			return GetEmployeeByIdResponse{v, err.Error()}, nil
 		}
 		return GetEmployeeByIdResponse{v, ""}, nil
-
 	}
 }
 func MakeDeleteEmployeesByIdEndpoint(svc Service) endpoint.Endpoint {
@@ -48,7 +70,6 @@ func MakeDeleteEmployeesByIdEndpoint(svc Service) endpoint.Endpoint {
 		}
 		return DeleteEmployeeByIdResponse{result, ""}, nil
 	}
-
 }
 func MakeUpdateEmployeeEndpoint(svc Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
@@ -58,7 +79,6 @@ func MakeUpdateEmployeeEndpoint(svc Service) endpoint.Endpoint {
 			return UpdateEmployeeResponse{result, res, err.Error()}, nil
 		}
 		return UpdateEmployeeResponse{result, res, ""}, nil
-
 	}
 }
 func MakeApproveEmployeeEndpoint(svc Service) endpoint.Endpoint {
@@ -69,7 +89,6 @@ func MakeApproveEmployeeEndpoint(svc Service) endpoint.Endpoint {
 			return DeleteEmployeeByIdResponse{res, err.Error()}, nil
 		}
 		return DeleteEmployeeByIdResponse{res, ""}, nil
-
 	}
 }
 

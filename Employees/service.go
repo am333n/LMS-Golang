@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	dc "lms/Database"
+	"lms/common"
 
 	"gorm.io/gorm"
 )
@@ -62,10 +63,15 @@ type Service interface {
 	GetLeaveRequest() ([]Requests, error)
 	ApproveLeaveRequest(id int) (string, error)
 	DeleteLeaveRequest(id int) (string, error)
-	GetLeaves()([]Leaves,error)
-	GetLeavesById(id int)(Leaves,error)
+	GetLeaves() ([]Leaves, error)
+	GetLeavesById(id int) (Leaves, error)
 }
+
 type RepoService struct{}
+
+func NewService() Service {
+	return &RepoService{}
+}
 
 //* ------------------------- Employee CRUD Functions ------------------------ */
 
@@ -92,7 +98,7 @@ func (RepoService) GetEmployees() ([]Employees, error) {
 	}
 	err = db.Find(&employees).Error
 	if err != nil {
-		return employees, err
+		return employees, common.ErrNoFile
 	}
 	return employees, nil
 }
@@ -104,7 +110,7 @@ func (RepoService) GetEmployeeById(id int) (Employees, error) {
 	}
 	err = db.Where("id =?", id).First(&employee).Error
 	if err != nil {
-		return employee, err
+		return employee, common.ErrIDNotFound
 	}
 	return employee, nil
 }
@@ -116,7 +122,7 @@ func (RepoService) DeleteEmployeeById(id int) (string, error) {
 	}
 	err = db.Where("id =?", id).Delete(&employee).Error
 	if err != nil {
-		return "", err
+		return "", common.ErrIDNotFound
 	}
 	return "The data is deleted", nil
 }
@@ -127,7 +133,7 @@ func (RepoService) UpdateEmployee(id int, employee Employees) (string, Employees
 	}
 	err = db.Where("id=?", id).Updates(&employee).Error
 	if err != nil {
-		return "", employee, err
+		return "", employee, common.ErrIDNotFound
 	}
 	return "The data is updated", employee, nil
 }
@@ -144,7 +150,7 @@ func (RepoService) ApproveEmployee(id int) (string, error) {
 
 		employee.Status = "Approved"
 		if err := db.Where("id=?", id).Updates(&employee).Error; err != nil {
-			return "", err
+			return "", common.ErrIDNotFound
 		}
 		return "The employee is Approved", nil
 	}
@@ -168,8 +174,8 @@ func (RepoService) PostLeaves(id int) (string, error) {
 	if err := db.Session(&gorm.Session{}).Where("id =?", id).First(&employee).Error; err != nil {
 		return "Employee Not Found", nil
 	}
-	if employee.Status=="Pending"{
-		return "",fmt.Errorf("Employee is not Approved %w",err)
+	if employee.Status == "Pending" {
+		return "", fmt.Errorf("Employee is not Approved %w", err)
 	}
 	//to check for already set entry in leave
 	if err := db.Session(&gorm.Session{}).Where("employee_id=?", id).First(&leave).Error; err != nil {
@@ -182,7 +188,7 @@ func (RepoService) PostLeaves(id int) (string, error) {
 		leave.EmergencyTaken = 0
 		err = db.Create(&leave).Error
 		if err != nil {
-			return "", err
+			return "", common.ErrBadParameter
 		}
 		return "Leave Table for the Employee is set", nil
 
@@ -215,29 +221,28 @@ func (RepoService) EnterLeaves(id int, leave Leaves) ([]Leaves, error) {
 	db.Find(&leaves)
 	return leaves, nil
 }
-func (RepoService)GetLeaves()([]Leaves,error){
+func (RepoService) GetLeaves() ([]Leaves, error) {
 	var leaves []Leaves
-	db,err:=dc.GetDB()
-	if err!=nil{
-		return nil,err
+	db, err := dc.GetDB()
+	if err != nil {
+		return nil, err
 	}
-	if err:=db.Find(&leaves).Error;err!=nil{
-		return nil,fmt.Errorf("Could not get Leaves: %w",err)
+	if err := db.Find(&leaves).Error; err != nil {
+		return nil, fmt.Errorf("Could not get Leaves: %w", err)
 	}
-	return leaves,nil
+	return leaves, nil
 }
-func (RepoService)GetLeavesById(id int)(Leaves,error){
+func (RepoService) GetLeavesById(id int) (Leaves, error) {
 	var leaves Leaves
-	db,err:=dc.GetDB()
-	if err!=nil{
-		return leaves,fmt.Errorf("Could not connect to db")
+	db, err := dc.GetDB()
+	if err != nil {
+		return leaves, fmt.Errorf("Could not connect to db")
 	}
-	if err:=db.Where("employee_id=?",id).First(&leaves).Error;err !=nil{
-		return leaves,fmt.Errorf("Could not find records")
+	if err := db.Where("employee_id=?", id).First(&leaves).Error; err != nil {
+		return leaves, fmt.Errorf("Could not find records")
 	}
-	return leaves,nil
+	return leaves, nil
 }
-
 
 /* ---------------------------- Request Functions --------------------------- */
 
@@ -303,7 +308,8 @@ func (RepoService) GetLeaveRequest() ([]Requests, error) {
 	}
 	return request, nil
 }
-//todo check json tags
+
+// todo check json tags
 func (RepoService) ApproveLeaveRequest(id int) (string, error) {
 	db, err := dc.GetDB()
 	if err != nil {
@@ -359,7 +365,8 @@ func (RepoService) ApproveLeaveRequest(id int) (string, error) {
 
 	return "Successfully Leave Balance Updated", nil
 }
-//TODO Reject Request
+
+// TODO Reject Request
 func (RepoService) DeleteLeaveRequest(id int) (string, error) {
 	db, err := dc.GetDB()
 	var request Requests
