@@ -67,7 +67,7 @@ type Service interface {
 	GetLeavesById(id int) (Leaves, error)
 }
 
-type RepoService struct{}
+// type RepoService struct{}
 
 func NewService() Service {
 	return &RepoService{}
