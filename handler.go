@@ -99,10 +99,12 @@ func initialiseRouter() *mux.Router {
 		m.EncodeResponse,
 	)
 	/* ------------------------- Leave Functions handler ------------------------ */
+	MakePostLeavesEndpoint:=auth.Middleware()(e.MakePostLeavesEndpoint(svc))
 	PostLeavesHandler := httptransport.NewServer(
-		e.MakePostLeavesEndpoint(svc),
+		MakePostLeavesEndpoint,
 		e.DecodeGetEmployeeByIdRequest,
 		e.EncodeResponse,
+		opts...
 	)
 	DeleteLeavesHandler := httptransport.NewServer(
 		e.MakeDeleteLeavesEndpoint(svc),
@@ -115,10 +117,12 @@ func initialiseRouter() *mux.Router {
 		e.EncodeResponse,
 	)
 	/* ---------------------------- Request Handlers ---------------------------- */
+	MakePostLeaveRequestEndpoint:=auth.Middleware()(e.MakePostLeaveRequestEndpoint(svc))
 	PostLeaveRequestHandler := httptransport.NewServer(
-		e.MakePostLeaveRequestEndpoint(svc),
+		MakePostLeaveRequestEndpoint,
 		e.DecodePostLeaveRequest,
 		e.EncodeResponse,
+		opts...,
 	)
 	GetRequestHandler := httptransport.NewServer(
 		e.MakeGetRequestEndpoint(svc),
