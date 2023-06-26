@@ -31,6 +31,8 @@ func EncodeError(_ context.Context, err error, w http.ResponseWriter) {
 		w.WriteHeader(http.StatusBadRequest)
 	case ErrInvalidCredentials:
 		w.WriteHeader(http.StatusUnauthorized)
+	case ErrPlsLogin:
+		w.WriteHeader(http.StatusUnauthorized)
 	default:
 		w.WriteHeader(http.StatusInternalServerError)
 	}
@@ -64,4 +66,5 @@ var (
 	ErrNoPermission         = errors.New("No Permission")
 	ErrNoFile               = errors.New("no file exists")
 	ErrInvalidCredentials   = errors.New("Invalid Credentials")
+	ErrPlsLogin             = errors.New("Please Login")
 )

@@ -20,7 +20,7 @@ type Users struct {
 	loginId  int    `gorm:"autoIncrement"`
 	Username string `json:"username"`
 	Password string `json:"password"`
-	Type     string `json:"type"`
+	Type     int `json:"type"`
 }
 
 type Credentials struct {
@@ -47,18 +47,11 @@ type LoginService interface {
 /* ----------------------------- Singup Function ---------------------------- */
 
 func (RepoService) Signup(TypeId int, users Users) (string, error) {
-	switch TypeId {
-	case 1:
-		users.Type = "Employee"
-	case 2:
-		users.Type = "Manager"
-	case 3:
-		users.Type = "Admin"
-	}
 	db, err := dc.GetDB()
 	if err != nil {
 		return "", errors.New("dB Connection Failed")
 	}
+	users.Type=TypeId
 	if err := db.Model(&users).Where("username=?", users.Username).First(&users).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			if err := db.Create(&users).Error; err != nil {
@@ -85,11 +78,10 @@ func (rs RepoService) Login(credentials Credentials) (LoggedInUser, error) {
 		}
 		return LoggedInUser{}, err
 	}
-	UserTypeInt, err := ValidateUserType(user)
 	if err != nil {
 		return LoggedInUser{}, common.ErrLoginInvalid
 	}
-	tokenString, err := auth.GenerateJWTToken(user.Username, user.loginId, UserTypeInt)
+	tokenString, err := auth.GenerateJWTToken(user.Username, user.loginId, user.Type)
 	if err != nil {
 		fmt.Printf("Failed to generate JWT token: %v\n", err)
 	}
@@ -99,7 +91,7 @@ func (rs RepoService) Login(credentials Credentials) (LoggedInUser, error) {
 		Details: UserDetails{
 			Username: user.Username,
 			UserId:   user.loginId,
-			UserType: UserTypeInt,
+			UserType: user.Type,
 		},
 	}
 
@@ -107,20 +99,20 @@ func (rs RepoService) Login(credentials Credentials) (LoggedInUser, error) {
 }
 
 // TO CHECK THE TYPE OF EMPLOYEE
-func ValidateUserType(user Users) (int, error) {
-	var UserTypeInt int
-	switch user.Type {
-	case "employee":
-		UserTypeInt = 1
-	case "manager":
-		UserTypeInt = 2
-	case "admin":
-		UserTypeInt = 3
-	default:
-		return UserTypeInt, errors.New("Invalid User Type")
-	}
-	return UserTypeInt, nil
-}
+// func ValidateUserType(user Users) (int, error) {
+// 	var UserTypeInt int
+// 	switch user.Type {
+// 	case "Employee":
+// 		UserTypeInt = 1
+// 	case "Manager":
+// 		UserTypeInt = 2
+// 	case "admin":
+// 		UserTypeInt = 3
+// 	default:
+// 		return UserTypeInt, errors.New("Invalid User Type")
+// 	}
+// 	return UserTypeInt, nil
+// }
 
 func Logout(w http.ResponseWriter, r *http.Request) {
 	clearCookie(w, "logintoken")

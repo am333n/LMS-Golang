@@ -34,11 +34,11 @@ func DecodeSignupRequest(_ context.Context, r *http.Request) (interface{}, error
 	params := mux.Vars(r)
 	switch params["type"] {
 	case "employee":
-		request.TypeId = 1
+		request.TypeId = 3
 	case "manager":
 		request.TypeId = 2
 	case "admin":
-		request.TypeId = 3
+		request.TypeId = 1
 	default:
 		return nil, errors.New("Invalid Type")
 	}

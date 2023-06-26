@@ -1,12 +1,11 @@
 package Employee
 
 import (
+	"context"
 	"time"
 
 	"github.com/go-kit/kit/log"
 )
-
-
 
 type Middleware func(Service) Service
 
@@ -32,101 +31,101 @@ func (m loggingMiddleware) PostEmployee(employee Employees) (Employees, error) {
 	}(time.Now())
 	return m.next.PostEmployee(employee)
 }
-func (m loggingMiddleware) GetEmployees() ([]Employees, error) {
+func (m loggingMiddleware) GetEmployees(ctx context.Context) ([]Employees, error) {
 
 	defer func(begin time.Time) {
-		m.logger.Log("method", "GetEmployees",  "took", time.Since(begin))
+		m.logger.Log("method", "GetEmployees", "took", time.Since(begin))
 	}(time.Now())
-	return m.next.GetEmployees()
+	return m.next.GetEmployees(ctx)
 }
 func (m loggingMiddleware) GetEmployeeById(id int) (Employees, error) {
 
 	defer func(begin time.Time) {
-		m.logger.Log("method", "GetEmployees",  "took", time.Since(begin))
+		m.logger.Log("method", "GetEmployeesById", "took", time.Since(begin))
 	}(time.Now())
-	return m.next.GetEmployeeById(id) 
+	return m.next.GetEmployeeById(id)
 }
-func (m loggingMiddleware) DeleteEmployeeById(id int) (string, error) {
+func (m loggingMiddleware) DeleteEmployeeById(ctx context.Context,id int) (string, error) {
 
 	defer func(begin time.Time) {
-		m.logger.Log("method", "GetEmployees",  "took", time.Since(begin))
+		m.logger.Log("method", "DeleteEmployeesById", "took", time.Since(begin))
 	}(time.Now())
-	return m.next.DeleteEmployeeById(id) 
+	return m.next.DeleteEmployeeById(ctx ,id )
 }
-func (m loggingMiddleware) UpdateEmployee(id int, employee Employees) (string, Employees, error) {
+func (m loggingMiddleware) UpdateEmployee(ctx context.Context,id int, employee Employees) (string, Employees, error) {
 
 	defer func(begin time.Time) {
-		m.logger.Log("method", "GetEmployees",  "took", time.Since(begin))
+		m.logger.Log("method", "UpdateEmployee", "took", time.Since(begin))
 	}(time.Now())
-	return m.next.UpdateEmployee(id , employee)
+	return m.next.UpdateEmployee(ctx ,id, employee)
 }
-func (m loggingMiddleware) PostLeaves(id int) (string, error) {
+func (m loggingMiddleware) PostLeaves(ctx context.Context,id int) (string, error) {
 
 	defer func(begin time.Time) {
-		m.logger.Log("method", "GetEmployees",  "took", time.Since(begin))
+		m.logger.Log("method", "PostLeave", "took", time.Since(begin))
 	}(time.Now())
-	return m.next.PostLeaves(id)
+	return m.next.PostLeaves(ctx,id)
 }
-func (m loggingMiddleware) DeleteLeaves(id int) (string, error) {
+func (m loggingMiddleware) DeleteLeaves(ctx context.Context,id int) (string, error) {
 
 	defer func(begin time.Time) {
-		m.logger.Log("method", "GetEmployees",  "took", time.Since(begin))
+		m.logger.Log("method", "DeleteLeave", "took", time.Since(begin))
 	}(time.Now())
-	return m.next.DeleteLeaves(id)
+	return m.next.DeleteLeaves(ctx,id)
 }
-func (m loggingMiddleware) EnterLeaves(id int, leave Leaves) ([]Leaves, error){
+func (m loggingMiddleware) EnterLeaves(ctx context.Context,id int, leave Leaves) ([]Leaves, error) {
 
 	defer func(begin time.Time) {
-		m.logger.Log("method", "GetEmployees",  "took", time.Since(begin))
+		m.logger.Log("method", "EnterLeave", "took", time.Since(begin))
 	}(time.Now())
-	return m.next.EnterLeaves(id, leave )
+	return m.next.EnterLeaves(ctx,id, leave)
 }
-func (m loggingMiddleware) ApproveEmployee(id int) (string, error){
+func (m loggingMiddleware) ApproveEmployee(ctx context.Context,id int) (string, error) {
 
 	defer func(begin time.Time) {
-		m.logger.Log("method", "GetEmployees",  "took", time.Since(begin))
+		m.logger.Log("method", "ApproveEmployee", "took", time.Since(begin))
 	}(time.Now())
-	return m.next.ApproveEmployee(id)
+	return m.next.ApproveEmployee(ctx,id)
 }
-func (m loggingMiddleware)PostLeaveRequest(request Requests) (string, error){
+func (m loggingMiddleware) PostLeaveRequest(ctx context.Context,request Requests) (string, error) {
 
 	defer func(begin time.Time) {
-		m.logger.Log("method", "GetEmployees",  "took", time.Since(begin))
+		m.logger.Log("method", "PostLEaveRequest", "took", time.Since(begin))
 	}(time.Now())
-	return m.next.PostLeaveRequest(request) 
+	return m.next.PostLeaveRequest(ctx,request)
 }
-func (m loggingMiddleware)GetLeaveRequest() ([]Requests, error){
+func (m loggingMiddleware) GetLeaveRequest(ctx context.Context) ([]Requests, error) {
 
 	defer func(begin time.Time) {
-		m.logger.Log("method", "GetEmployees",  "took", time.Since(begin))
+		m.logger.Log("method", "GetLeaveReuest", "took", time.Since(begin))
 	}(time.Now())
-	return m.next.GetLeaveRequest()
+	return m.next.GetLeaveRequest(ctx)
 }
-func (m loggingMiddleware)ApproveLeaveRequest(id int) (string, error){
+func (m loggingMiddleware) ApproveLeaveRequest(ctx context.Context,id int) (string, error) {
 
 	defer func(begin time.Time) {
-		m.logger.Log("method", "GetEmployees",  "took", time.Since(begin))
+		m.logger.Log("method", "ApproveLeaveRequest", "took", time.Since(begin))
 	}(time.Now())
-	return m.next.ApproveLeaveRequest(id) 
+	return m.next.ApproveLeaveRequest(ctx,id)
 }
-func (m loggingMiddleware)DeleteLeaveRequest(id int) (string, error){
+func (m loggingMiddleware) DeleteLeaveRequest(ctx context.Context,id int) (string, error) {
 
 	defer func(begin time.Time) {
-		m.logger.Log("method", "GetEmployees",  "took", time.Since(begin))
+		m.logger.Log("method", "DeleteLeaveRequest", "took", time.Since(begin))
 	}(time.Now())
-	return m.next.DeleteLeaveRequest(id)
+	return m.next.DeleteLeaveRequest(ctx,id)
 }
-func (m loggingMiddleware)GetLeaves()([]Leaves,error){
+func (m loggingMiddleware) GetLeaves(ctx context.Context) ([]Leaves, error) {
 
 	defer func(begin time.Time) {
-		m.logger.Log("method", "GetEmployees",  "took", time.Since(begin))
+		m.logger.Log("method", "GetLeaves", "took", time.Since(begin))
 	}(time.Now())
-	return m.next.GetLeaves()
+	return m.next.GetLeaves(ctx,)
 }
-func (m loggingMiddleware)GetLeavesById(id int)(Leaves,error){
+func (m loggingMiddleware) GetLeavesById(ctx context.Context,id int) (Leaves, error) {
 
 	defer func(begin time.Time) {
-		m.logger.Log("method", "GetEmployees",  "took", time.Since(begin))
+		m.logger.Log("method", "GetLeavesById", "took", time.Since(begin))
 	}(time.Now())
-	return m.next.GetLeavesById(id)
+	return m.next.GetLeavesById(ctx,id)
 }

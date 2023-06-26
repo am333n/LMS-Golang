@@ -15,7 +15,7 @@ func Middleware() endpoint.Middleware {
 		return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 			td := ctx.Value(TokenContextKey)
 			if td == nil {
-				return nil, common.ErrLoginInvalid
+				return nil, common.ErrPlsLogin
 			}
 			tokenData := td.(string)
 			tokenString := tokenData
@@ -57,16 +57,16 @@ func Middleware() endpoint.Middleware {
 		}
 	}
 }
-func EmployeeEntryMiddleware() endpoint.Middleware {
-	return func(next endpoint.Endpoint) endpoint.Endpoint {
-		return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-			usertype:=ctx.Value("userType")
-			switch usertype{
-			case 1: 
-				return next(ctx,nil)
-			default:
-				return next(ctx,common.ErrLoginInvalid)
-			}
-		}
-	}
-}
+// func EmployeeEntryMiddleware() endpoint.Middleware {
+// 	return func(next endpoint.Endpoint) endpoint.Endpoint {
+// 		return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+// 			usertype:=ctx.Value("userType")
+// 			switch usertype{
+// 			case 1: 
+// 				return next(ctx,nil)
+// 			default:
+// 				return next(ctx,common.ErrLoginInvalid)
+// 			}
+// 		}
+// 	}
+// }

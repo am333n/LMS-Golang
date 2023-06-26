@@ -18,7 +18,8 @@ import (
 
 func initialiseRouter() *mux.Router {
 	logger := log.NewLogfmtLogger(os.Stderr)
-	svc := e.NewService()
+	controleer:=e.NewController() 
+	svc := e.NewService(controleer)
 	svc = e.LoggingMiddleware(logger)(svc)
 	svcc := m.RepoService{}
 	svccc := login.RepoService{}

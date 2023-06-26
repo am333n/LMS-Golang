@@ -32,7 +32,7 @@ func MakeServerEndpoints(s Service) Endpoints {
 /* ------------------------ Employee CRUD operations ------------------------ */
 
 func MakePostEmployeeEndpoint(svc Service) endpoint.Endpoint {
-	return func(_ context.Context, request interface{}) (interface{}, error) {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(PostEmployeeRequest)
 		v, err := svc.PostEmployee(req.employee)
 		if err != nil {
@@ -42,9 +42,9 @@ func MakePostEmployeeEndpoint(svc Service) endpoint.Endpoint {
 	}
 }
 func MakeGetEmployeesEndpoint(svc Service) endpoint.Endpoint {
-	return func(_ context.Context, request interface{}) (interface{}, error) {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		//req := request.(GetEmployeesRequest)
-		v, err := svc.GetEmployees()
+		v, err := svc.GetEmployees(ctx)
 		if err != nil {
 			return v, err
 		}
@@ -52,7 +52,7 @@ func MakeGetEmployeesEndpoint(svc Service) endpoint.Endpoint {
 	}
 }
 func MakeGetEmployeesByIdEndpoint(svc Service) endpoint.Endpoint {
-	return func(_ context.Context, request interface{}) (interface{}, error) {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(int)
 		v, err := svc.GetEmployeeById(req)
 		if err != nil {
@@ -62,9 +62,9 @@ func MakeGetEmployeesByIdEndpoint(svc Service) endpoint.Endpoint {
 	}
 }
 func MakeDeleteEmployeesByIdEndpoint(svc Service) endpoint.Endpoint {
-	return func(_ context.Context, request interface{}) (interface{}, error) {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(int)
-		result, err := svc.DeleteEmployeeById(req)
+		result, err := svc.DeleteEmployeeById(ctx,req)
 		if err != nil {
 			return DeleteEmployeeByIdResponse{result, err.Error()}, nil
 		}
@@ -72,9 +72,9 @@ func MakeDeleteEmployeesByIdEndpoint(svc Service) endpoint.Endpoint {
 	}
 }
 func MakeUpdateEmployeeEndpoint(svc Service) endpoint.Endpoint {
-	return func(_ context.Context, request interface{}) (interface{}, error) {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(UpdateEmployeeRequest)
-		result, res, err := svc.UpdateEmployee(req.id, req.employee)
+		result, res, err := svc.UpdateEmployee(ctx,req.id, req.employee)
 		if err != nil {
 			return UpdateEmployeeResponse{result, res, err.Error()}, nil
 		}
@@ -82,9 +82,9 @@ func MakeUpdateEmployeeEndpoint(svc Service) endpoint.Endpoint {
 	}
 }
 func MakeApproveEmployeeEndpoint(svc Service) endpoint.Endpoint {
-	return func(_ context.Context, request interface{}) (interface{}, error) {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(int)
-		res, err := svc.ApproveEmployee(req)
+		res, err := svc.ApproveEmployee(ctx,req)
 		if err != nil {
 			return DeleteEmployeeByIdResponse{res, err.Error()}, nil
 		}
@@ -97,7 +97,7 @@ func MakeApproveEmployeeEndpoint(svc Service) endpoint.Endpoint {
 func MakePostLeavesEndpoint(svc Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(int)
-		result, err := svc.PostLeaves(req)
+		result, err := svc.PostLeaves(ctx,req)
 		if err != nil {
 			return DeleteEmployeeByIdResponse{result, err.Error()}, nil
 		}
@@ -107,7 +107,7 @@ func MakePostLeavesEndpoint(svc Service) endpoint.Endpoint {
 func MakeDeleteLeavesEndpoint(svc Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(int)
-		result, err := svc.DeleteLeaves(req)
+		result, err := svc.DeleteLeaves(ctx,req)
 		if err != nil {
 			return DeleteEmployeeByIdResponse{result, err.Error()}, nil
 		}
@@ -118,7 +118,7 @@ func MakeDeleteLeavesEndpoint(svc Service) endpoint.Endpoint {
 func MakeEnterLeaveEndpoint(svc Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(EnterLeaveRequest)
-		v, err := svc.EnterLeaves(req.id, req.leave)
+		v, err := svc.EnterLeaves(ctx,req.id, req.leave)
 		if err != nil {
 			return EnterLeaveResponse{v, err.Error()}, nil
 		}
@@ -127,7 +127,7 @@ func MakeEnterLeaveEndpoint(svc Service) endpoint.Endpoint {
 }
 func MakeGetLeavesEndpoint(svc Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		v, err := svc.GetLeaves()
+		v, err := svc.GetLeaves(ctx)
 		if err != nil {
 			return EnterLeaveResponse{v, err.Error()}, nil
 		}
@@ -140,7 +140,7 @@ func MakeGetLeavesEndpoint(svc Service) endpoint.Endpoint {
 func MakePostLeaveRequestEndpoint(svc Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(PostLeaveRequestRequest)
-		v, err := svc.PostLeaveRequest(req.request)
+		v, err := svc.PostLeaveRequest(ctx,req.request)
 		if err != nil {
 			return PostLeaveRequestResponse{v, err.Error()}, nil
 		}
@@ -149,7 +149,7 @@ func MakePostLeaveRequestEndpoint(svc Service) endpoint.Endpoint {
 }
 func MakeGetRequestEndpoint(svc Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		v, err := svc.GetLeaveRequest()
+		v, err := svc.GetLeaveRequest(ctx)
 		if err != nil {
 			return GetLeaveRequestResponse{v, err.Error()}, nil
 		}
@@ -159,7 +159,7 @@ func MakeGetRequestEndpoint(svc Service) endpoint.Endpoint {
 func MakeApproveLeaveRequestEndpoint(svc Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(int)
-		v, err := svc.ApproveLeaveRequest(req)
+		v, err := svc.ApproveLeaveRequest(ctx,req)
 		if err != nil {
 			return PostLeaveRequestResponse{v, err.Error()}, nil
 		}
@@ -169,7 +169,7 @@ func MakeApproveLeaveRequestEndpoint(svc Service) endpoint.Endpoint {
 func MakeDeleteLeaveRequestEndpoint(svc Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(int)
-		v, err := svc.DeleteLeaveRequest(req)
+		v, err := svc.DeleteLeaveRequest(ctx,req)
 		if err != nil {
 			return PostLeaveRequestResponse{v, err.Error()}, nil
 		}
@@ -179,7 +179,7 @@ func MakeDeleteLeaveRequestEndpoint(svc Service) endpoint.Endpoint {
 func MakeGetLeavesByIdEndpoint(svc Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(int)
-		v, err := svc.GetLeavesById(req)
+		v, err := svc.GetLeavesById(ctx,req)
 		if err != nil {
 			return GetLeavesByIdResponse{v, err.Error()}, nil
 		}

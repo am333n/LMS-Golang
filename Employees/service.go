@@ -1,6 +1,7 @@
 package Employee
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	dc "lms/Database"
@@ -51,31 +52,33 @@ type Requests struct {
 
 type Service interface {
 	PostEmployee(employee Employees) (Employees, error)
-	GetEmployees() ([]Employees, error)
+	GetEmployees(ctx context.Context) ([]Employees, error)
 	GetEmployeeById(id int) (Employees, error)
-	DeleteEmployeeById(id int) (string, error)
-	UpdateEmployee(id int, employee Employees) (string, Employees, error)
-	PostLeaves(id int) (string, error)
-	DeleteLeaves(id int) (string, error)
-	EnterLeaves(id int, leave Leaves) ([]Leaves, error)
-	ApproveEmployee(id int) (string, error)
-	PostLeaveRequest(request Requests) (string, error)
-	GetLeaveRequest() ([]Requests, error)
-	ApproveLeaveRequest(id int) (string, error)
-	DeleteLeaveRequest(id int) (string, error)
-	GetLeaves() ([]Leaves, error)
-	GetLeavesById(id int) (Leaves, error)
+	DeleteEmployeeById(ctx context.Context,id int) (string, error)
+	UpdateEmployee(ctx context.Context,id int, employee Employees) (string, Employees, error)
+	PostLeaves(ctx context.Context,id int) (string, error)
+	DeleteLeaves(ctx context.Context,id int) (string, error)
+	EnterLeaves(ctx context.Context,id int, leave Leaves) ([]Leaves, error)
+	ApproveEmployee(ctx context.Context,id int) (string, error)
+	PostLeaveRequest(ctx context.Context,request Requests) (string, error)
+	GetLeaveRequest(ctx context.Context) ([]Requests, error)
+	ApproveLeaveRequest(ctx context.Context,id int) (string, error)
+	DeleteLeaveRequest(ctx context.Context,id int) (string, error)
+	GetLeaves(ctx context.Context) ([]Leaves, error)
+	GetLeavesById(ctx context.Context,id int) (Leaves, error)
 }
 
-// type RepoService struct{}
+// type s RepoService struct{}
 
-func NewService() Service {
-	return &RepoService{}
+func NewService(controller Controller) Service {
+	return &RepoService{
+		controller: controller,
+	}
 }
 
 //* ------------------------- Employee CRUD Functions ------------------------ */
 
-func (RepoService) PostEmployee(employee Employees) (Employees, error) {
+func (s RepoService) PostEmployee(employee Employees) (Employees, error) {
 	var empty Employees
 	if employee.Name == "" {
 		return empty, ErrEmpty
@@ -90,8 +93,13 @@ func (RepoService) PostEmployee(employee Employees) (Employees, error) {
 	}
 	return employee, nil
 }
-func (RepoService) GetEmployees() ([]Employees, error) {
+func (s RepoService) GetEmployees(ctx context.Context) ([]Employees, error) {
 	var employees []Employees
+	_,err:=s.controller.CheckIfAdminOrManager(ctx)
+	if err!=nil{
+		return nil,common.ErrNoPermission
+	}
+	
 	db, err := dc.GetDB()
 	if err != nil {
 		return employees, err
@@ -102,8 +110,9 @@ func (RepoService) GetEmployees() ([]Employees, error) {
 	}
 	return employees, nil
 }
-func (RepoService) GetEmployeeById(id int) (Employees, error) {
+func (s RepoService) GetEmployeeById(id int) (Employees, error) {
 	var employee Employees
+
 	db, err := dc.GetDB()
 	if err != nil {
 		return employee, err
@@ -114,8 +123,12 @@ func (RepoService) GetEmployeeById(id int) (Employees, error) {
 	}
 	return employee, nil
 }
-func (RepoService) DeleteEmployeeById(id int) (string, error) {
+func (s RepoService) DeleteEmployeeById(ctx context.Context,id int) (string, error) {
 	var employee Employees
+	_,err:=s.controller.CheckIfAdmin(ctx)
+	if err!=nil{
+		return "",common.ErrNoPermission
+	}
 	db, err := dc.GetDB()
 	if err != nil {
 		return "", err
@@ -126,7 +139,11 @@ func (RepoService) DeleteEmployeeById(id int) (string, error) {
 	}
 	return "The data is deleted", nil
 }
-func (RepoService) UpdateEmployee(id int, employee Employees) (string, Employees, error) {
+func (s RepoService) UpdateEmployee(ctx context.Context,id int, employee Employees) (string, Employees, error) {
+	_,err:=s.controller.CheckIfAdmin(ctx)
+	if err!=nil{
+		return "",employee,common.ErrNoPermission
+	}
 	db, err := dc.GetDB()
 	if err != nil {
 		return "", employee, err
@@ -137,7 +154,11 @@ func (RepoService) UpdateEmployee(id int, employee Employees) (string, Employees
 	}
 	return "The data is updated", employee, nil
 }
-func (RepoService) ApproveEmployee(id int) (string, error) {
+func (s RepoService) ApproveEmployee(ctx context.Context,id int) (string, error) {
+	_,err:=s.controller.CheckIfAdmin(ctx)
+	if err!=nil{
+		return "",common.ErrNoPermission
+	}
 	db, err := dc.GetDB()
 	if err != nil {
 		return "", err
@@ -163,7 +184,11 @@ var ErrEmpty = errors.New("empty employee name")
 //* ----------------------------- Leave Functions ---------------------------- */
 //new
 
-func (RepoService) PostLeaves(id int) (string, error) {
+func (s RepoService) PostLeaves(ctx context.Context,id int) (string, error) {
+	_,err:=s.controller.CheckIfAdmin(ctx)
+	if err!=nil{
+		return "",common.ErrNoPermission
+	}
 	db, err := dc.GetDB()
 	var leave Leaves
 	var employee Employees
@@ -195,7 +220,11 @@ func (RepoService) PostLeaves(id int) (string, error) {
 	}
 	return "Leave Already Set", err
 }
-func (RepoService) DeleteLeaves(id int) (string, error) {
+func (s RepoService) DeleteLeaves(ctx context.Context,id int) (string, error) {
+	_,err:=s.controller.CheckIfAdmin(ctx)
+	if err!=nil{
+		return "",common.ErrNoPermission
+	}
 	db, err := dc.GetDB()
 	var leave Leaves
 	if err != nil {
@@ -208,7 +237,11 @@ func (RepoService) DeleteLeaves(id int) (string, error) {
 
 }
 
-func (RepoService) EnterLeaves(id int, leave Leaves) ([]Leaves, error) {
+func (s RepoService) EnterLeaves(ctx context.Context,id int, leave Leaves) ([]Leaves, error) {
+	_,err:=s.controller.CheckIfAdmin(ctx)
+	if err!=nil{
+		return nil,common.ErrNoPermission
+	}
 	var leaves []Leaves
 	db, err := dc.GetDB()
 	if err != nil {
@@ -221,7 +254,7 @@ func (RepoService) EnterLeaves(id int, leave Leaves) ([]Leaves, error) {
 	db.Find(&leaves)
 	return leaves, nil
 }
-func (RepoService) GetLeaves() ([]Leaves, error) {
+func (s RepoService) GetLeaves(ctx context.Context) ([]Leaves, error) {
 	var leaves []Leaves
 	db, err := dc.GetDB()
 	if err != nil {
@@ -232,7 +265,7 @@ func (RepoService) GetLeaves() ([]Leaves, error) {
 	}
 	return leaves, nil
 }
-func (RepoService) GetLeavesById(id int) (Leaves, error) {
+func (s RepoService) GetLeavesById(ctx context.Context,id int) (Leaves, error) {
 	var leaves Leaves
 	db, err := dc.GetDB()
 	if err != nil {
@@ -246,7 +279,11 @@ func (RepoService) GetLeavesById(id int) (Leaves, error) {
 
 /* ---------------------------- Request Functions --------------------------- */
 
-func (RepoService) PostLeaveRequest(request Requests) (string, error) {
+func (s RepoService) PostLeaveRequest(ctx context.Context,request Requests) (string, error) {
+	_,err:=s.controller.CheckIfEmployee(ctx)
+	if err!=nil{
+		return "",common.ErrNoPermission
+	}
 	var employee Employees
 	var leave Leaves
 	db, err := dc.GetDB()
@@ -297,7 +334,11 @@ func (RepoService) PostLeaveRequest(request Requests) (string, error) {
 	}
 	return "bla", nil
 }
-func (RepoService) GetLeaveRequest() ([]Requests, error) {
+func (s RepoService) GetLeaveRequest(ctx context.Context) ([]Requests, error) {
+	_,err:=s.controller.CheckIfAdminOrManager(ctx)
+	if err!=nil{
+		return nil,common.ErrNoPermission
+	}
 	db, err := dc.GetDB()
 	var request []Requests
 	if err != nil {
@@ -310,7 +351,11 @@ func (RepoService) GetLeaveRequest() ([]Requests, error) {
 }
 
 // todo check json tags
-func (RepoService) ApproveLeaveRequest(id int) (string, error) {
+func (s RepoService) ApproveLeaveRequest(ctx context.Context,id int) (string, error) {
+	_,err:=s.controller.CheckIfAdminOrManager(ctx)
+	if err!=nil{
+		return "",common.ErrNoPermission
+	}
 	db, err := dc.GetDB()
 	if err != nil {
 		return "", err
@@ -367,7 +412,11 @@ func (RepoService) ApproveLeaveRequest(id int) (string, error) {
 }
 
 // TODO Reject Request
-func (RepoService) DeleteLeaveRequest(id int) (string, error) {
+func (s RepoService) DeleteLeaveRequest(ctx context.Context,id int) (string, error) {
+	_,err:=s.controller.CheckIfAdminOrManager(ctx)
+	if err!=nil{
+		return "",common.ErrNoPermission
+	}
 	db, err := dc.GetDB()
 	var request Requests
 	if err != nil {
