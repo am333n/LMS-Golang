@@ -7,8 +7,8 @@ import (
 )
 
 func MakeGetManagersEndpoint(svc Service) endpoint.Endpoint {
-	return func(_ context.Context, request interface{}) (interface{}, error) {
-		v, err := svc.GetManagers()
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		v, err := svc.GetManagers(ctx)
 		if err != nil {
 			return GetManagersResponse{v, err.Error()}, nil
 		}
@@ -16,9 +16,9 @@ func MakeGetManagersEndpoint(svc Service) endpoint.Endpoint {
 	}
 }
 func MakePostManagerEndpoint(svc Service) endpoint.Endpoint {
-	return func(_ context.Context, request interface{}) (interface{}, error) {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(PostManagerRequest)
-		v, err := svc.PostManager(req.manager)
+		v, err := svc.PostManager(ctx,req.manager)
 		if err != nil {
 			return PostManagerResponse{v, err.Error()}, nil
 		}
@@ -27,9 +27,9 @@ func MakePostManagerEndpoint(svc Service) endpoint.Endpoint {
 	}
 }
 func MakeGetManagerByIdEndpoint(svc Service) endpoint.Endpoint {
-	return func(_ context.Context, request interface{}) (interface{}, error) {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req:= request.(int)
-		v,err:=svc.GetManagerById(req)
+		v,err:=svc.GetManagerById(ctx,req)
 		if err!=nil{
 			return GetManagerByIdResponse{v,err.Error()},nil
 		}
@@ -37,9 +37,9 @@ func MakeGetManagerByIdEndpoint(svc Service) endpoint.Endpoint {
     }	
 }
 func MakeDeleteManagerEndpoint(svc Service) endpoint.Endpoint {
-	return func(_ context.Context, request interface{}) (interface{}, error) {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req:=request.(int)
-		v,err:=svc.DeleteManager(req)
+		v,err:=svc.DeleteManager(ctx,req)
 		if err!=nil{
 			return DeleteManagerResponse{v,err.Error()},nil
 		}
@@ -47,9 +47,9 @@ func MakeDeleteManagerEndpoint(svc Service) endpoint.Endpoint {
 	}
 }
 func MakeUpdateManagerEndpoint(svc Service) endpoint.Endpoint{
-	return func(_ context.Context, request interface{}) (interface{}, error){
+	return func(ctx context.Context, request interface{}) (interface{}, error){
 		req:=request.(UpdateManagerRequest)
-		v,err:=svc.UpdateManager(req.id,req.manager)
+		v,err:=svc.UpdateManager(ctx,req.id,req.manager)
 		if err!=nil{
 			return UpdateManagerResponse{v,err.Error()},nil
 		}

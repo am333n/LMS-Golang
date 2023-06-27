@@ -21,7 +21,8 @@ func initialiseRouter() *mux.Router {
 	controleer:=e.NewController() 
 	svc := e.NewService(controleer)
 	svc = e.LoggingMiddleware(logger)(svc)
-	svcc := m.RepoService{}
+	controlle:=m.NewController()
+	svcc := m.NewService(controlle)
 	svccc := login.RepoService{}
 	//employee handlers
 	opts := []khttp.ServerOption{

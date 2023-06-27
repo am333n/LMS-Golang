@@ -97,7 +97,7 @@ func (s RepoService) GetEmployees(ctx context.Context) ([]Employees, error) {
 	var employees []Employees
 	_,err:=s.controller.CheckIfAdminOrManager(ctx)
 	if err!=nil{
-		return nil,common.ErrNoPermission
+		return nil,err
 	}
 	
 	db, err := dc.GetDB()

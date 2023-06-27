@@ -1,6 +1,7 @@
 package managers
 
 import (
+	"context"
 	dc "lms/Database"
 
 	"gorm.io/gorm"
@@ -15,18 +16,32 @@ type Manager struct {
 	Email      string `json:"email"`
 	Phone      int    `json:"phone"`
 	//pending or accepted status
-	Status     string `json:"status"`
+	Status string `json:"status"`
 }
 type Service interface {
-	GetManagers() ([]Manager, error)
-	PostManager(manager Manager) (string, error)
-	GetManagerById(id int) (Manager, error)
-	DeleteManager(id int) (string, error)
-	UpdateManager(id int, manager Manager) (string, error)
+	GetManagers(ctx context.Context) ([]Manager, error)
+	PostManager(ctx context.Context,manager Manager) (string, error)
+	GetManagerById(ctx context.Context,id int) (Manager, error)
+	DeleteManager(ctx context.Context,id int) (string, error)
+	UpdateManager(ctx context.Context,id int, manager Manager) (string, error)
 }
-type RepoService struct{}
 
-func (RepoService) GetManagers() ([]Manager, error) {
+func NewService(controller Controller) Service {
+	return &RepoService{
+		controller:controller,
+	}
+
+}
+
+type RepoService struct {
+	controller Controller
+}
+
+func (s RepoService) GetManagers(ctx context.Context) ([]Manager, error) {
+	_, err := s.controller.CheckIfAdmin(ctx)
+	if err!=nil{
+		return nil,err
+	}
 	var managers []Manager
 	db, err := dc.GetDB()
 	if err != nil {
@@ -39,7 +54,11 @@ func (RepoService) GetManagers() ([]Manager, error) {
 	return managers, nil
 
 }
-func (RepoService) PostManager(manager Manager) (string, error) {
+func (s RepoService) PostManager(ctx context.Context,manager Manager) (string, error) {
+	_, err := s.controller.CheckIfAdmin(ctx)
+	if err!=nil{
+		return "",err
+	}
 	db, err := dc.GetDB()
 	if err != nil {
 		return "", err
@@ -51,7 +70,11 @@ func (RepoService) PostManager(manager Manager) (string, error) {
 	return "New Manager Added", nil
 
 }
-func (RepoService) GetManagerById(id int) (Manager, error) {
+func (s RepoService) GetManagerById(ctx context.Context,id int) (Manager, error) {
+	_, err := s.controller.CheckIfAdmin(ctx)
+	if err!=nil{
+		return Manager{},err
+	}
 	db, err := dc.GetDB()
 	var manager Manager
 	if err != nil {
@@ -63,7 +86,11 @@ func (RepoService) GetManagerById(id int) (Manager, error) {
 	}
 	return manager, nil
 }
-func (RepoService) DeleteManager(id int) (string, error) {
+func (s RepoService) DeleteManager(ctx context.Context,id int) (string, error) {
+	_, err := s.controller.CheckIfAdmin(ctx)
+	if err!=nil{
+		return "",err
+	}
 	db, err := dc.GetDB()
 	var manager Manager
 	if err != nil {
@@ -76,7 +103,11 @@ func (RepoService) DeleteManager(id int) (string, error) {
 	return "Manager Deleted", nil
 
 }
-func (RepoService) UpdateManager(id int, manager Manager) (string, error) {
+func (s RepoService) UpdateManager(ctx context.Context,id int, manager Manager) (string, error) {
+	_, err := s.controller.CheckIfAdmin(ctx)
+	if err!=nil{
+		return "",err
+	}
 	db, err := dc.GetDB()
 	if err != nil {
 		return "", err
