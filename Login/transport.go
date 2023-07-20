@@ -71,5 +71,5 @@ func EncodeLoginResponse(_ context.Context, w http.ResponseWriter, response inte
 	}
 
 
-	return json.NewEncoder(w).Encode(res.loggedUser.Details)
+	return json.NewEncoder(w).Encode(res.loggedUser)
 }

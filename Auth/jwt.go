@@ -19,7 +19,7 @@ func GenerateJWTToken(username string, id int, userType int) (string, error) {
 	// Set the claims for the token
 	claims := token.Claims.(jwt.MapClaims)
 	claims["username"] = username
-	claims["exp"] = time.Now().Add(time.Minute * 30).Unix() // Set the token expiration time
+	claims["exp"] = time.Now().Add(time.Minute * 60).Unix() // Set the token expiration time
 	claims["userType"] =userType
 
 	// Sign the token with the secret key

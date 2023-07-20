@@ -62,7 +62,7 @@ func (RepoService) Signup(TypeId int, users Users) (string, error) {
 		}
 		return "", err
 	}
-	return " Username Already Exists", nil
+	return "", errors.New(" Username Already Exists")
 }
 
 func (rs RepoService) Login(credentials Credentials) (LoggedInUser, error) {
