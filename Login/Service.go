@@ -16,7 +16,6 @@ import (
 /* --------------------------------- Structs -------------------------------- */
 type RepoService struct{}
 type Users struct {
-	gorm.Model
 	loginId  int    `gorm:"autoIncrement"`
 	Username string `json:"username"`
 	Password string `json:"password"`
